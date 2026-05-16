@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
     //lazy initialization
     val city1: String by lazy { "abc" }
     val city2: String? by lazy { null }
-    val abc : Int by lazy{10}
+    val abc: Int by lazy { 10 }
 
     //Thread mode definitions:
     val data1 by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { "abc" }
@@ -78,67 +78,67 @@ class MainActivity : AppCompatActivity() {
     //Detailed explanation on lazy syntax
     val city: String by lazy { "abc" }
 
-  /*  Break it into 3 parts:
-    🔹 (1) lazy { "abc" }
-    This creates a Lazy object (wrapper)
-    It does NOT execute "abc" immediately
+    /*  Break it into 3 parts:
+      🔹 (1) lazy { "abc" }
+      This creates a Lazy object (wrapper)
+      It does NOT execute "abc" immediately
 
-    Think:
-    val temp = lazy { "abc" }  // not executed yet
+      Think:
+      val temp = lazy { "abc" }  // not executed yet
 
-    🔹 (2) by
-    by = delegation
-    Means: “Don’t store value in city, delegate it to another object”
-    👉 So city is NOT storing "abc" directly
+      🔹 (2) by
+      by = delegation
+      Means: “Don’t store value in city, delegate it to another object”
+      👉 So city is NOT storing "abc" directly
 
-    🔹 (3) Combined meaning
-    val city: String by lazy { "abc" }
-
-    👉 Means:
-    “city will get its value from lazy object when needed”
-    Internal Working (Clean Version)
-
-    Equivalent logic:
-    val cityDelegate = lazy { "abc" }
-
-    val city: String
-        get() = cityDelegate.value
-
-    ⚡ Runtime flow
-    First time:
-    println(city)
-
-    Steps:
-
-    - city getter called
-    - cityDelegate.value accessed
-    - { "abc" } executes
-    - Value stored (cached)
-    - "abc" returned
-
-    Second time:
-    println(city)
-
-    Steps:
-    - cityDelegate.value accessed
-    - Already initialized ✅
-    - Cached value returned (no execution)
-
-     When we write:
+      🔹 (3) Combined meaning
       val city: String by lazy { "abc" }
-      The `lazy {}` actually returns an object of type:
-      Lazy<String>
 
-     What is Lazy<String> (Lazy object / wrapper)?
-      This Lazy object is a wrapper/controller that:
-        - Stores the lambda → { "abc" }
-        - Executes it only on first access
-        - Caches (stores) the result
-        - Returns cached value on next calls
+      👉 Means:
+      “city will get its value from lazy object when needed”
+      Internal Working (Clean Version)
 
-    🎯 One-line understanding
-    city doesn’t store value — it asks delegate every time, and delegate caches result after first call.
-    */
+      Equivalent logic:
+      val cityDelegate = lazy { "abc" }
+
+      val city: String
+          get() = cityDelegate.value
+
+      ⚡ Runtime flow
+      First time:
+      println(city)
+
+      Steps:
+
+      - city getter called
+      - cityDelegate.value accessed
+      - { "abc" } executes
+      - Value stored (cached)
+      - "abc" returned
+
+      Second time:
+      println(city)
+
+      Steps:
+      - cityDelegate.value accessed
+      - Already initialized ✅
+      - Cached value returned (no execution)
+
+       When we write:
+        val city: String by lazy { "abc" }
+        The `lazy {}` actually returns an object of type:
+        Lazy<String>
+
+       What is Lazy<String> (Lazy object / wrapper)?
+        This Lazy object is a wrapper/controller that:
+          - Stores the lambda → { "abc" }
+          - Executes it only on first access
+          - Caches (stores) the result
+          - Returns cached value on next calls
+
+      🎯 One-line understanding
+      city doesn’t store value — it asks delegate every time, and delegate caches result after first call.
+      */
 
 
     /**
@@ -194,6 +194,685 @@ class MainActivity : AppCompatActivity() {
         sealedClassesExample()
         genericsExample()
         delegationExample()
+    }
+
+    fun varValConst() {
+
+        // =========================================================
+        // 1. var (Mutable Variable)
+        // =========================================================
+
+        /*
+         * - 'var' means mutable variable.
+         * - Its value CAN be changed after declaration.
+         * - Memory/reference can be reassigned multiple times.
+         * - Use 'var' only when modification is actually needed.
+         */
+
+        var counter: Int = 0
+        counter = 10 // ✅ Valid
+
+
+        // =========================================================
+        // 2. val (Read-Only Variable)
+        // =========================================================
+
+        /*
+         * - 'val' means read-only variable.
+         * - Once assigned, it CANNOT be reassigned.
+         * - It must be initialized either:
+         *      1. At declaration
+         *      2. In init block
+         *      3. Via constructor
+         *
+         * - 'val' makes code safer and more predictable.
+         * - Preferred over 'var' whenever possible.
+         */
+
+        val languageName: String = "Kotlin"
+
+        // languageName = "Java"
+        // ❌ ERROR: Val cannot be reassigned.
+
+        // ---------------------------------------------------------
+        // 1. Initialization at Declaration
+        // ---------------------------------------------------------
+
+        val appName: String = "MyApp"
+
+        // ---------------------------------------------------------
+        // 2. Initialization inside init block
+        // ---------------------------------------------------------
+
+        class User {
+            val country: String
+
+            init {
+                country = "India"
+            }
+        }
+
+        /*
+         * Once assigned inside init,
+         * it cannot be reassigned again.
+         */
+
+        // ---------------------------------------------------------
+        // 3. Initialization via Constructor
+        // ---------------------------------------------------------
+
+        class Employee(
+            val id: Int,
+            val name: String
+        )
+
+        /*
+         * Constructor automatically initializes:
+         *
+         * id
+         * name
+         */
+
+        // =========================================================
+        // Important Concept:
+        // val makes the REFERENCE immutable,
+        // NOT necessarily the OBJECT itself.
+        // =========================================================
+
+        val nameList = mutableListOf("John")
+
+        // nameList = mutableListOf("Jane")
+        // ❌ ERROR: Cannot change the reference
+
+        nameList.add("Doe")
+        // ✅ Valid because the list object itself is mutable
+
+
+        // =========================================================
+        // 3. val at Runtime
+        // =========================================================
+
+        /*
+         * A 'val' value can still be determined at runtime.
+         * It simply cannot be reassigned afterward.
+         */
+
+        val runtimeValue: Double = Math.random()
+
+        val currentTime: Long = System.currentTimeMillis()
+
+        /*
+         * The values above are assigned DURING execution,
+         * not during compilation.
+         */
+
+
+        // =========================================================
+        // 4. const val (Compile-Time Constant)
+        // =========================================================
+
+        /*
+         * 'const' is a MODIFIER in Kotlin.
+         *
+         * It converts a 'val' into a compile-time constant.
+         *
+         * Meaning:
+         * - Value MUST be known before app runs
+         * - Value is fixed forever
+         * - Compiler directly replaces usages with actual value
+         *
+         * Since compile-time constants can never change,
+         * 'const' works ONLY with 'val'
+         * and NEVER with 'var'.
+         */
+
+        // const var MAX = 10
+        // ❌ ERROR: const cannot be used with var
+
+
+        // =========================================================
+        // Rules of const val
+        // =========================================================
+
+        /*
+         * const val:
+         *
+         * ✅ Must be initialized immediately
+         * ✅ Must be primitive or String
+         * ✅ Must be known at compile time
+         *
+         * ❌ Cannot use runtime functions
+         * ❌ Cannot create objects
+         * ❌ Cannot be declared inside normal functions i.e. local variables
+         */
+
+
+        // const val random = Math.random()
+        // ❌ Runtime value not allowed
+
+        // const val list = mutableListOf(1, 2, 3)
+        // ❌ Object creation not allowed
+
+
+        // =========================================================
+        // Valid const val Locations
+        // =========================================================
+
+        /*
+         * const val can only be declared:
+         *
+         * 1. Top-level
+         * 2. Inside object
+         * 3. Inside companion object
+         *
+         * NOT inside normal functions/classes.
+         */
+
+        /*
+         * Example:
+         *
+         * const val APP_NAME = "MyApp"
+         *
+         * object Constants {
+         *     const val MAX_COUNT = 100
+         * }
+         */
+
+
+        // =========================================================
+        // Important Syntax Note
+        // =========================================================
+
+        /*
+         * 'const' itself is NOT a variable declaration keyword.
+         *
+         * It is only a modifier.
+         *
+         * Therefore:
+         *
+         * val  -> declares read-only variable
+         * const -> modifies it into compile-time constant
+         */
+
+        // const MAX_SIZE = 100
+        // ❌ ERROR
+
+        // Correct:
+        // const val MAX_SIZE = 100
+
+
+        // =========================================================
+        // Quick Revision
+        // =========================================================
+
+        /*
+         * var       -> mutable variable
+         * val       -> read-only reference
+         * const val -> compile-time constant
+         *
+         * var  -> can reassign
+         * val  -> cannot reassign
+         * const val -> cannot reassign + known at compile time
+         */
+
+
+        // =========================================================
+        // Important Syntax + Analogy
+        // =========================================================
+
+        /*
+         * In Kotlin's grammar:
+         *
+         * 'const' is a MODIFIER,
+         * not a declaration keyword like 'val' or 'var'.
+         *
+         * A modifier changes the characteristics
+         * of an existing declaration.
+         *
+         * Think of it like this:
+         *
+         *  - 'val' declares:
+         *      "This is a read-only variable."
+         *
+         *  - 'const' modifies that declaration:
+         *      "And make it a compile-time constant."
+         *
+         * So:
+         *
+         * val name = "Kotlin"
+         * -> read-only variable
+         *
+         * const val APP_NAME = "MyApp"
+         * -> read-only + compile-time constant
+         *
+         * Since compile-time constants can NEVER change,
+         * 'const' only works with 'val'
+         * and not with 'var'.
+         */
+
+        // =========================================================
+        // Quick Difference: var vs val vs const val
+        // =========================================================
+
+        /*
+         * var
+         * ----
+         * - Mutable
+         * - Can reassign
+         * - Runtime value allowed
+         *
+         *
+         * val
+         * ----
+         * - Read-only reference
+         * - Cannot reassign
+         * - Runtime value allowed
+         *
+         *
+         * const val
+         * ----------
+         * - Compile-time constant
+         * - Cannot reassign
+         * - Value must be known before app runs
+         * - Only primitive/String values allowed
+         */
+    }
+
+    private fun nullSafety() {
+
+        // =========================================================
+        // Kotlin Null Safety
+        // =========================================================
+
+        /*
+         * Kotlin's type system helps prevent:
+         *
+         * NullPointerException (NPE)
+         * which is one of the most common crashes in Java.
+         *
+         * By default:
+         * - Variables CANNOT store null
+         * - Nullable types must be explicitly marked using '?'
+         */
+
+        // =========================================================
+        // 1. Non-Nullable Type
+        // =========================================================
+        /*
+         * Normal types cannot hold null.
+         */
+
+        val username: String = "Steve"
+        // username = null
+        // ❌ ERROR
+
+
+        // =========================================================
+        // 2. Nullable Type
+        // =========================================================
+
+        /*
+         * '?' makes a type nullable.
+         *
+         * String?
+         * means:
+         * - Can hold String
+         * - Can also hold null
+         */
+
+        val name: String? = /* null */ "Steve"
+
+
+        // =========================================================
+        // 3. Safe Call Operator ( ?. )
+        // =========================================================
+
+        /*
+         * Executes only if object is NOT null.
+         *
+         * Returns:
+         * - actual value if object is not null
+         * - null if object itself is null
+         *
+         * Prevents NullPointerException.
+         */
+        println("Length = ${name?.length}")
+
+
+        // =========================================================
+        // 4. Safe Call with let ( ?.let )
+        // =========================================================
+
+        /*
+         * Executes block ONLY IF value is not null.
+         * 'it' becomes non-null inside block.
+         */
+        name?.let {
+            // Here 'it' is String (not String?)
+            println("Length = ${it.length}")
+        }
+
+
+        // =========================================================
+        // 5. Smart Cast
+        // =========================================================
+
+        /*
+         * Kotlin automatically converts nullable type
+         * into non-null type after null check.
+         */
+
+        if (name != null) {
+            // Smart cast happens here
+            println(name.length)
+        }
+
+        // =========================================================
+        // 6. Elvis Operator ( ?: )
+        // =========================================================
+
+        /*
+         * Provides default value if expression becomes null.
+         * Read as:
+         * "If left side is null,
+         * use right side value."
+         */
+        val length = name?.length ?: -1
+        println("Length = $length")
+
+
+        // =========================================================
+        // 7. Non-Null Assertion Operator ( !! )
+        // =========================================================
+        /*
+         * Converts nullable type into non-null manually.
+         * Use ONLY when you are absolutely sure
+         * value is not null.
+         *
+         * Otherwise throws:
+         * NullPointerException (NPE)
+         */
+
+        println(name!!.length)
+
+        /*
+         * Dangerous example:
+         *
+         * val name: String? = null
+         * println(name!!.length)
+         *
+         * ❌ Crash -> NullPointerException
+         */
+
+
+        // =========================================================
+        // 8. Safe Cast Operator ( as? )
+        // =========================================================
+
+        /*
+         * Safely converts one type into another.
+         *
+         * Returns:
+         * - converted value if successful
+         * - null if conversion fails
+         *
+         * Prevents ClassCastException.
+         */
+        val data: Any = "Kotlin"
+
+        val safeString: String? = data as? String
+        println(safeString)
+
+        val invalidCast: Int? = data as? Int
+        println(invalidCast) // null
+
+        // =========================================================
+        // Unsafe Cast ( as )
+        // =========================================================
+
+        /*
+         * 'as' performs unsafe cast.
+         *
+         * Throws:
+         * ClassCastException
+         * if conversion fails.
+         */
+        // val number = data as Int
+        // ❌ Crash -> ClassCastException
+
+
+        // =========================================================
+        // 9. Nullable Collections
+        // =========================================================
+
+        /*
+         * There is a BIG difference between:
+         *
+         * List<String?>
+         * and
+         * List<String>?
+         */
+
+
+        // List itself NOT null
+        // Elements CAN be null
+
+        val list1: List<String?> =
+            listOf("A", null, "B")
+
+
+        // List itself CAN be null
+        // Elements cannot be null
+
+        val list2: List<String>? =
+            listOf("A", "B")
+
+
+        /*
+         * Read carefully:
+         *
+         * List<String?>
+         * -> nullable ITEMS
+         *
+         * List<String>?
+         * -> nullable LIST
+         */
+
+
+        // =========================================================
+        // 10. Filtering Null Values
+        // =========================================================
+
+        val numbers: List<Int?> =
+            listOf(1, 2, null, 4)
+
+        /*
+         * filterNotNull()
+         * removes null values
+         * and converts type to non-nullable.
+         */
+
+        val nonNullNumbers: List<Int> =
+            numbers.filterNotNull()
+
+        println(nonNullNumbers)
+
+
+        // =========================================================
+        // 11. late init vs Nullable
+        // =========================================================
+
+        /*
+         * Sometimes we don't want nullable variable,
+         * but initialization happens later.
+         *
+         * Use:
+         * lateinit var
+         */
+
+        /*
+         * Example:
+         *
+         * lateinit var username: String
+         *
+         * username = "Steve"
+         *
+         * println(username)
+         */
+
+
+        /*
+         * Difference:
+         *
+         * String?
+         * -> value may genuinely be null
+         *
+         * lateinit
+         * -> value will definitely come later
+         */
+
+
+        /*
+         * lateinit limitations:
+         *
+         * ❌ Cannot use with:
+         * - val
+         * - primitive types
+         * - nullable types
+         */
+
+
+        // =========================================================
+        // 12. Platform Types (Java Interoperability)
+        // =========================================================
+
+        /*
+         * Kotlin interacts with Java using:
+         *
+         * Platform Types
+         *
+         * Represented internally as:
+         *
+         * String!
+         */
+
+
+        /*
+         * Problem:
+         *
+         * Kotlin cannot always know whether
+         * Java value is nullable or not.
+         * So compiler trusts developer.
+         */
+
+
+        /*
+         * Example:
+         *
+         * Java:
+         *
+         * String getName()
+         *
+         * Kotlin sees:
+         *
+         * String!
+         */
+
+
+        /*
+         * Platform types are dangerous because:
+         *
+         * They may throw NPE at runtime.
+         */
+
+
+        // =========================================================
+        // 13. Nullable Generic Types
+        // =========================================================
+        /*
+         * Generic types are nullable by default.
+         */
+
+        fun <T> printValue(value: T) {
+            println(value)
+        }
+
+        /*
+         * Here T can be nullable.
+         */
+
+        /*
+         * Restrict generic to non-null type:
+         */
+        fun <T : Any> printNonNull(value: T) {
+            println(value)
+        }
+
+        /*
+         * T : Any
+         * means:
+         *
+         * T cannot be null
+         */
+
+
+        // =========================================================
+        // 14. Chained Safe Calls
+        // =========================================================
+        data class Address(
+            val city: String?
+        )
+        data class User(
+            val address: Address?
+        )
+
+        val user: User? =
+            User(Address("Mumbai"))
+
+        /*
+         * Chain safely through multiple nullable objects.
+         */
+        val city =
+            user?.address?.city
+        println(city)
+
+
+        // =========================================================
+        // 15. let + Elvis Combination
+        // =========================================================
+
+        /*
+         * Common real-world pattern.
+         */
+        name?.let {
+            println("Name exists: $it")
+        } ?: run {
+            println("Name is null")
+        }
+
+
+        // =========================================================
+        // Quick Revision
+        // =========================================================
+
+        /*
+         * ?     -> nullable type
+         * ?.    -> safe call
+         * ?:    -> Elvis operator
+         * !!    -> non-null assertion
+         * as?   -> safe cast
+         * let   -> execute only if non-null
+         *
+         *
+         * String?
+         * -> nullable variable
+         *
+         * lateinit
+         * -> initialize later
+         *
+         * Platform type (String!)
+         * -> comes from Java
+         */
     }
 
     fun controlFlow() {
@@ -262,50 +941,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun nullSafety() {
-        // WAP to find out length of name
-        val name: String? =/* null*/"Steve"     // change it to null and see the effect in output
-
-        // 1. Safe Call ( ?. )
-        // Returns the length if 'name' is not null else returns NULL
-        // Use it if you don't mind getting NULL value
-        println("The length of name is ${name?.length}")
-
-
-        // 2. Safe Call with let ( ?.let )
-        // It executes the block ONLY IF name is NOT NULL
-        name?.let {
-            println("The length of name is ${name.length}")
-        }
-
-
-        // 3. Elvis-operator ( ?: )
-        // When we have nullable reference 'name', we can say "is name is not null", use it,
-        // otherwise use some non-null value"
-        val len = if (name != null)
-            name.length
-        else
-            -1
-
-        val length = name?.length ?: -1
-        println("The length of name is ${length}")
-
-        /** The expression name?.length ?: -1 works in two steps:
-         * 1.Safe Call (?.): First, name?.length is evaluated. If name is not null, this expression returns the integer value of its length. If name is null, it returns null instead of throwing a NullPointerException.
-         * 2.Elvis Operator (?:): Next, the Elvis operator checks the result of the safe call.
-         * •If the result is not null (meaning name had a value), the Elvis operator returns that value (the length).
-         * •If the result is null (meaning name was null), the Elvis operator returns the default value provided on its right side, which is -1.
-         *
-         * In short, the Elvis operator (?:) acts on the result of the expression to its left,
-         * not on the original variable (name).
-         * */
-
-        // 4. Non-null assertion operator ( !! )
-        // Use it when you are sure the value is NOT NULL
-        // Throws NullPointerException if the value is found to be NULL
-
-        println("The length of name is ${name!!.length}")
-    }
 
     private fun predicates() {
         val myNumbers = listOf(2, 3, 4, 6, 23, 90)
@@ -1992,68 +2627,5 @@ class MainActivity : AppCompatActivity() {
         const val TAG = "log_D"
     }
 
-    fun varValConst() {
-        var counter: Int = 0
-        //counter = 10 // This is valid because 'counter' is a var.
-
-        // 2. val (short for value)
-        /*
-     * - It is immutable (read-only).
-     * - It must be initialized at the time of declaration or in an init block.
-     * - Once assigned, it CANNOT be reassigned. This helps prevent accidental changes.
-     * - The object it refers to might still be mutable itself.
-     * - 'val' is preferred over 'var' for safer, more predictable code.
-     */
-        val languageName: String = "Kotlin"
-        // languageName = "Java" // ERROR: Val cannot be reassigned.
-
-        /*
-     * The object a 'val' refers to can still have its internal state changed.
-     * This is a key concept: the reference is immutable, not necessarily the object.
-     */
-        val nameList = mutableListOf("John")
-        // nameList = mutableListOf("Jane") // ERROR: The 'val' reference cannot be changed.
-        nameList.add("Doe")                  // OK: The list object itself is mutable.
-
-        /*
-     * --- In-depth: val vs. const ---
-     *
-     * The key difference is WHEN the value is assigned.
-     * 'val' is a runtime constant, while 'const' is a compile-time constant.
-     */
-
-        /**
-         * 'val' - Runtime Constant
-         *
-         * The value is assigned at runtime when the code is executed.
-         * This means it can be assigned the result of a function call or any other runtime logic.
-         * It can be declared inside a class, a function, or at the top level of a file.
-         */
-        val runtimeValue: Double = Math.random() // Value is determined when this line runs.
-        val currentTime: Long =
-            System.currentTimeMillis() // Value depends on when the code executes.
-
-        /*
- * --- An Important Note on Syntax: Why "const val" and not just "const"? ---
- *
- * In Kotlin's grammar, 'const' is a MODIFIER, not a declaration keyword like 'val' or 'var'.
- * A modifier changes the characteristics of a declaration.
- *
- * Think of it like a label you attach to a variable:
- *  - 'val' declares: "This is a read-only variable."
- *  - 'const' modifies that declaration: "And make it a compile-time constant."
- *
- * Therefore, the two must be used together to create a compile-time constant.
- *
- * // CORRECT: 'const' modifies a 'val' declaration.
- * const val MAX_SIZE = 100
- *
- * // INCORRECT: 'const' alone is not a declaration and results in a syntax error.
- * // const MAX_SIZE = 100 // ✗ This will not compile.
- *
- * Since all 'const' values must be known at compile time, they are inherently read-only,
- * which is why you can only use 'const' with 'val' and never with 'var'.
- */
-    }
 
 }
