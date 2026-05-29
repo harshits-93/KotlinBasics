@@ -667,7 +667,6 @@ class MainActivity : AppCompatActivity() {
         val list2: List<String>? =
             listOf("A", "B")
 
-
         /*
          * Read carefully:
          *
@@ -699,60 +698,14 @@ class MainActivity : AppCompatActivity() {
 
 
         // =========================================================
-        // 11. late init vs Nullable
-        // =========================================================
-
-        /*
-         * Sometimes we don't want nullable variable,
-         * but initialization happens later.
-         *
-         * Use:
-         * lateinit var
-         */
-
-        /*
-         * Example:
-         *
-         * lateinit var username: String
-         *
-         * username = "Steve"
-         *
-         * println(username)
-         */
-
-
-        /*
-         * Difference:
-         *
-         * String?
-         * -> value may genuinely be null
-         *
-         * lateinit
-         * -> value will definitely come later
-         */
-
-
-        /*
-         * lateinit limitations:
-         *
-         * ❌ Cannot use with:
-         * - val
-         * - primitive types
-         * - nullable types
-         */
-
-
-        // =========================================================
-        // 12. Platform Types (Java Interoperability)
+        // 11. Platform Types (Java Interoperability)
         // =========================================================
 
         /*
          * Kotlin interacts with Java using:
          *
          * Platform Types
-         *
          * Represented internally as:
-         *
          * String!
          */
 
@@ -781,13 +734,12 @@ class MainActivity : AppCompatActivity() {
 
         /*
          * Platform types are dangerous because:
-         *
          * They may throw NPE at runtime.
          */
 
 
         // =========================================================
-        // 13. Nullable Generic Types
+        // 12. Nullable Generic Types
         // =========================================================
         /*
          * Generic types are nullable by default.
@@ -817,7 +769,7 @@ class MainActivity : AppCompatActivity() {
 
 
         // =========================================================
-        // 14. Chained Safe Calls
+        // 13. Chained Safe Calls
         // =========================================================
         data class Address(
             val city: String?
@@ -838,7 +790,7 @@ class MainActivity : AppCompatActivity() {
 
 
         // =========================================================
-        // 15. let + Elvis Combination
+        // 14. let + Elvis Combination
         // =========================================================
 
         /*
@@ -875,9 +827,81 @@ class MainActivity : AppCompatActivity() {
          */
     }
 
-    fun controlFlow() {
-        // when with a subject, You check a single value against multiple options.
+    private fun controlFlow() {
+
+        // =========================================================
+        // Kotlin Control Flow
+        // =========================================================
+
+        /*
+         * Control Flow determines:
+         *
+         * - which code executes
+         * - when it executes
+         * - how many times it executes
+         *
+         * Main control flow structures:
+         *
+         * 1. if / else
+         * 2. when
+         * 3. for loop
+         * 4. while loop
+         * 5. do-while loop
+         * 6. break / continue
+         */
+
+
+
+        // =========================================================
+        // 1. if / else Statement
+        // =========================================================
+
+        val age = 20
+        if (age >= 18) {
+            println("Adult")
+        } else {
+            println("Minor")
+        }
+
+        // =========================================================
+        // 2. if as Expression
+        // =========================================================
+
+        /*
+         * In Kotlin:
+         *
+         * if can return a value.
+         *
+         * Unlike Java,
+         * Kotlin does not always require ternary operator.
+         */
+
+        val result = if (age >= 18) {
+            "Eligible"
+        } else {
+            "Not Eligible"
+        }
+        println(result)
+
+
+
+        // =========================================================
+        // 3. when Statement
+        // =========================================================
+
+        /*
+         * Used when checking:
+         *
+         * - multiple values
+         * - multiple conditions
+         * - types
+         * - ranges
+         *
+         * Kotlin alternative to Java switch.
+         */
+
         val number = 2
+
         when (number) {
             1 -> println("One")
             2 -> println("Two")
@@ -885,41 +909,602 @@ class MainActivity : AppCompatActivity() {
             else -> println("Other number")
         }
 
-        //Above is used as statement, but below is where when is used as expression
-        var a = 1
-        val result = when (a) {
+        // =========================================================
+        // 4. when as Expression
+        // =========================================================
+
+        /*
+         * 'when' can also return value.
+         */
+        val value = when (number) {
             1 -> "One"
             2 -> "Two"
-            else -> "else"
+            else -> "Unknown"
         }
-        Log.d(Companion.TAG, "controlFlow: $result")
+        println(value)
 
-        //Used when you want to check multiple conditions or ranges, not just one variable.
+
+        // =========================================================
+        // 5. when without Argument
+        // =========================================================
+
+        /*
+         * Useful for:
+         * - multiple conditions
+         * - ranges
+         * - complex logic
+         */
+
         val x = 15
+
         when {
-            x < 0 -> println("Negative number")
-            x in 1..10 -> println("Between 1 and 10")
-            x % 2 == 0 -> println("Even number")
-            else -> println("Other case")
+            x < 0 ->
+                println("Negative")
+            x in 1..10 ->
+                println("Between 1 and 10")
+            x % 2 == 0 ->
+                println("Even Number")
+            else ->
+                println("Other case")
         }
 
-        do {
-            println("start of do")
-            a++
-        } while (a < 1)
+
+        // =========================================================
+        // 6. Type Checking using 'is'
+        // =========================================================
+
+        /*
+         * 'is' checks object type.
+         *
+         * Similar to:
+         *
+         * instanceof (Java)
+         */
+
+        val data: Any = "Kotlin"
+
+        when (data) {
+            is String ->
+                println("String of length ${data.length}")
+            is Int ->
+                println("Integer")
+            else ->
+                println("Unknown type")
+        }
+
+        // =========================================================
+        // 7. Advanced Looping & Iteration
+        // =========================================================
+
+        /*
+         * Kotlin loops are built heavily around:
+         *
+         * - ranges
+         * - iterators
+         * - collections
+         * - higher-order functions
+         *
+         * Unlike Java:
+         * Kotlin does NOT have:
+         *
+         * for(initialization; condition; update)
+         *
+         * syntax.
+         */
+
+        // =========================================================
+        // 7.1 Range Iteration
+        // =========================================================
+
+        /*
+         * '..'
+         * creates inclusive range.
+         *
+         * 1..5
+         * -> 1,2,3,4,5
+         */
+
+        for (i in 1..5) {
+            print("$i ")
+        }
+        println()
+
+        // =========================================================
+        // 7.2 until
+        // =========================================================
+
+        /*
+         * 'until'
+         * excludes upper bound.
+         *
+         * 1 until 5
+         * -> 1,2,3,4
+         */
+
+        for (i in 1 until 5) {
+            print("$i ")
+        }
+        println()
 
 
-        var n = 12
-        val limit = sqrt(n.toDouble()).toInt()
+        // =========================================================
+        // 7.3 downTo
+        // =========================================================
 
-        for (i in 1..limit) {
-            if (n % i == 0) {
-                print("$i ")
-                if (i != n / i) {
-                    print("$(n/i) ")
-                }
+        /*
+         * Reverse iteration.
+         */
+        for (i in 5 downTo 1) {
+            print("$i ")
+        }
+        println()
+
+
+        // =========================================================
+        // 7.4 step
+        // =========================================================
+
+        /*
+         * Skips values using interval.
+         */
+        for (i in 1..10 step 2) {
+            print("$i ")
+        }
+        println()
+
+
+        // =========================================================
+        // 7.5 reversed()
+        // =========================================================
+
+        /*
+         * Creates reversed progression.
+         */
+
+        for (i in (1..5).reversed()) {
+            print("$i ")
+        }
+        println()
+
+        // =========================================================
+        // 7.6 Iterating Collections
+        // =========================================================
+
+        val fruits =
+            listOf("Apple", "Banana", "Mango")
+        /*
+         * Direct item iteration.
+         */
+        for (fruit in fruits) {
+            println(fruit)
+        }
+
+
+        // =========================================================
+        // 7.7 indices
+        // =========================================================
+
+        /*
+         * Returns valid index range.
+         */
+
+        for (index in fruits.indices) {
+            println(
+                "Index = $index, Value = ${fruits[index]}"
+            )
+        }
+
+
+        /*
+         * Internally:
+         *
+         * fruits.indices
+         *
+         * roughly becomes:
+         *
+         * 0 until fruits.size
+         */
+
+
+        // =========================================================
+        // 7.8 withIndex()
+        // =========================================================
+
+        /*
+         * Cleaner way to get:
+         * - index
+         * - value
+         */
+        for ((index, value) in fruits.withIndex()) {
+            println("$index -> $value")
+        }
+
+        /*
+         * This uses:
+         * destructuring declaration
+         */
+
+        // =========================================================
+        // 7.9 forEach
+        // =========================================================
+
+        /*
+         * Functional iteration style.
+         *
+         * Uses lambda internally.
+         */
+
+        fruits.forEach {
+            println(it)
+        }
+
+        /*
+         * Equivalent:
+         */
+
+        fruits.forEach { fruit ->
+            println(fruit)
+        }
+
+
+        /*
+         * Important:
+         *
+         * forEach is NOT exactly same as for loop.
+         *
+         * Since it uses lambda:
+         * - control flow behaves differently
+         * - return behavior differs
+         */
+
+
+        // =========================================================
+        // 7.10 forEachIndexed
+        // =========================================================
+
+        fruits.forEachIndexed { index, value ->
+            println("$index -> $value")
+        }
+
+        /*
+         * Cleaner alternative to:
+         *
+         * indices + collection[index]
+         */
+
+        // =========================================================
+        // 7.11 repeat()
+        // =========================================================
+
+        /*
+         * Executes block fixed number of times.
+         */
+
+        repeat(3) {
+            println("Executed: $it")
+        }
+
+        /*
+         * 'it' starts from 0.
+         */
+
+
+        // =========================================================
+        // 7.12 Iterator
+        // =========================================================
+
+        /*
+         * Collections internally use iterators.
+         */
+        val iterator = fruits.iterator()
+        while (iterator.hasNext()) {
+            println(iterator.next())
+        }
+
+        /*
+         * for loop internally also uses iterator.
+         */
+
+        // =========================================================
+        // 7.13 Mutation During Iteration
+        // =========================================================
+
+        val mutableList =
+            mutableListOf(1, 2, 3)
+
+        /*
+         * Dangerous:
+         *
+         * Modifying collection during iteration
+         * may throw:
+         *
+         * ConcurrentModificationException
+         */
+
+        // for (item in mutableList) {
+        //
+        //     mutableList.remove(item)
+        // }
+
+
+        // =========================================================
+        // 7.14 Safe Removal using Iterator
+        // =========================================================
+        val itr = mutableList.iterator()
+        while (itr.hasNext()) {
+            val item = itr.next()
+            if (item == 2) {
+                itr.remove()
             }
         }
+        /*
+         * Iterator safely updates collection state.
+         */
+
+
+        // =========================================================
+        // 7.15 Nested Loops
+        // =========================================================
+
+        for (i in 1..3) {
+            for (j in 1..3) {
+                println("$i $j")
+            }
+        }
+
+
+        // =========================================================
+        // 7.16 Labels
+        // =========================================================
+
+        /*
+         * Labels help control nested loop flow.
+         */
+
+        outer@
+        for (i in 1..3) {
+            for (j in 1..3) {
+                if (i == 2 && j == 2) {
+                    break@outer
+                }
+                println("$i $j")
+            }
+        }
+        /*
+         * continue@label
+         * also possible.
+         */
+
+        // =========================================================
+        // 7.17 Non-local Return in forEach
+        // =========================================================
+
+        /*
+         * Important senior-level concept.
+         *
+         * Since forEach is inline,
+         * 'return' inside lambda may return
+         * from OUTER function itself.
+         */
+
+        fun testReturn() {
+            listOf(1, 2, 3).forEach {
+                if (it == 2) {
+                    return
+                }
+            }
+
+            /*
+             * Never reached.
+             */
+        }
+
+        /*
+         * To return only from lambda:
+         */
+        fun testLocalReturn() {
+            listOf(1, 2, 3).forEach label@{
+                if (it == 2) {
+                    return@label
+                }
+
+                println(it)
+            }
+        }
+
+
+
+        // =========================================================
+        // 7.18 Progression Internals
+        // =========================================================
+
+        /*
+         * Kotlin ranges use Progression internally.
+         *
+         * Example:
+         *
+         * 1..10 step 2
+         *
+         * becomes IntProgression.
+         */
+
+
+        /*
+         * Types:
+         *
+         * IntProgression
+         * LongProgression
+         * CharProgression
+         */
+
+
+
+        // =========================================================
+        // 7.19 Char Iteration
+        // =========================================================
+
+        for (c in 'a'..'f') {
+            print("$c ")
+        }
+
+        println()
+
+
+
+        // =========================================================
+        // 7.20 Collection vs Sequence Iteration
+        // =========================================================
+
+        /*
+         * Collections:
+         * eager evaluation
+         *
+         * Sequences:
+         * lazy evaluation
+         *
+         * Important for performance optimization.
+         */
+
+        // =========================================================
+        // 10. while Loop
+        // =========================================================
+
+        /*
+         * Executes while condition is true.
+         */
+
+        var count = 1
+
+        while (count <= 3) {
+            println(count)
+            count++
+        }
+
+
+        // =========================================================
+        // 11. do-while Loop
+        // =========================================================
+
+        /*
+         * Executes at least ONCE,
+         * even if condition is false.
+         */
+
+        var value2 = 5
+
+        do {
+            println("Executed once")
+            value2++
+        } while (value2 < 5)
+
+
+
+        // =========================================================
+        // 12. break
+        // =========================================================
+
+        /*
+         * Immediately exits loop.
+         */
+
+        for (i in 1..10) {
+            if (i == 5) {
+                break
+            }
+            print("$i ")
+        }
+        println()
+
+
+        // =========================================================
+        // 13. continue
+        // =========================================================
+
+        /*
+         * Skips current iteration.
+         */
+
+        for (i in 1..5) {
+            if (i == 3) {
+                continue
+            }
+            print("$i ")
+        }
+        println()
+
+
+
+        // =========================================================
+        // 14. Labeled break
+        // =========================================================
+
+        /*
+         * Used in nested loops.
+         */
+
+        outerLoop@
+        for (i in 1..3) {
+            for (j in 1..3) {
+                if (i == 2 && j == 2) {
+                    break@outerLoop
+                }
+                println("$i $j")
+            }
+        }
+
+
+        // =========================================================
+        // 15. Infinite Loop
+        // =========================================================
+
+        /*
+         * Loop with condition always true.
+         */
+
+        // while (true) {
+        //
+        // }
+
+
+
+        // =========================================================
+        // Quick Revision
+        // =========================================================
+
+        /*
+         * if
+         * -> conditional execution
+         *
+         * when
+         * -> Kotlin switch replacement
+         *
+         * for
+         * -> iterate fixed/range values
+         *
+         * while
+         * -> executes while condition true
+         *
+         * do-while
+         * -> executes at least once
+         *
+         * break
+         * -> exit loop
+         *
+         * continue
+         * -> skip current iteration
+         *
+         * ..
+         * -> inclusive range
+         *
+         * until
+         * -> excludes upper bound
+         *
+         * downTo
+         * -> reverse iteration
+         *
+         * step
+         * -> jump interval
+         */
     }
 
     private fun extensionFunction() {
