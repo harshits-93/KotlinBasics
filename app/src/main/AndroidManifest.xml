@@ -21,6 +21,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".CoroutinesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FlowActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

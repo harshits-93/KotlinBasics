@@ -1,16 +1,29 @@
 package com.kotlinpractice
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import kotlin.coroutines.EmptyCoroutineContext.get
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
+// =========================================================
+// TYPE ALIASES (must be top-level - Kotlin does not allow nested type aliases)
+// =========================================================
+// TYPE ALIASES (must be top-level - Kotlin does not allow nested type aliases)
+// =========================================================
 
+// typealias gives an ALTERNATE NAME to an existing type.
+// It does NOT create a new type - it is just a nickname, fully interchangeable.
+typealias UserId = String
+typealias UserMap = Map<UserId, String>
+typealias ClickAction = (String) -> Unit
 
 class MainActivity : AppCompatActivity() {
     /*
@@ -42,6 +55,9 @@ class MainActivity : AppCompatActivity() {
     //So, w.r.t point 2.) if we add ? to String or any object type then, lateinit won't allow it.
     //But below one is valid
     lateinit var name: String
+
+    // How to check if initialized without crashing:
+    // if (::name.isInitialized) { println(name) }
 
     /*++++
     * lazy keyword usage and rules.
@@ -201,6 +217,30 @@ class MainActivity : AppCompatActivity() {
         sealedClassesExample()
         genericsExample()
         delegationExample()
+
+        // Newly added concepts (senior interview revision).
+        enumClasses()
+        objectExpressions()
+        nestedAndInnerClasses()
+        errorHandling()
+        defaultNamedVarargArgs()
+        destructuring()
+        sealedInterfaceExample()
+        typeAliasExample()
+        infixAndOperatorOverloading()
+        nothingAndUnit()
+        customPropertyDelegate()
+        sequenceVsCollection()
+        collectionTransformations()
+        valueClassExample()
+
+        // Launch the coroutine / flow course activities
+        findViewById<Button>(R.id.btn_coroutines).setOnClickListener {
+            startActivity(Intent(this, CoroutinesActivity::class.java))
+        }
+        findViewById<Button>(R.id.btn_flow).setOnClickListener {
+            startActivity(Intent(this, FlowActivity::class.java))
+        }
     }
 
     fun varValConst() {
@@ -2389,7 +2429,6 @@ class MainActivity : AppCompatActivity() {
          */
 
         abstract class Shape {
-
             abstract val area: Double
         }
 
@@ -2420,7 +2459,6 @@ class MainActivity : AppCompatActivity() {
          }
 
          class Car : Drivable {
-
              override fun drive() {
                  println("Driving")
              }
@@ -2497,84 +2535,51 @@ class MainActivity : AppCompatActivity() {
         // =========================================================
         // 7. Interface Delegation
         // =========================================================
+        // 7. Class Delegation (`by` clause)
+        // =========================================================
 
         /*
-         * Important Kotlin feature.
-         *
-         * Reduces boilerplate delegation code.
+         * Class Delegation reduces boilerplate delegation code.
+         * "Favor composition over inheritance."
          */
 
-        /* interface Printer {
-
-             fun print()
-         }
-
-         class FilePrinter : Printer {
-
-             override fun print() {
-                 println("Printing from file")
-             }
-         }
-
-         class Manager(
-             private val printer: Printer
-         ) : Printer by printer*/
+        val manager = Manager(FilePrinter())
+        manager.print() // Delegates directly to FilePrinter's print()
 
 
         // =========================================================
-        // 8. Functional Interface (SAM)
+        // 8. Functional Interface (SAM - Single Abstract Method)
         // =========================================================
 
         /*
-         * fun interface:
-         * contains single abstract method.
-         *
-         * Supports lambda instantiation.
+         * 'fun interface' contains exactly ONE abstract method.
+         * Enables clean SAM conversion (lambda instantiation).
          */
 
-        /*      fun interface ClickListener {
+        val listener = ClickListener {
+            println("Button Clicked via SAM conversion!")
+        }
+        listener.onClick()
 
-                  fun onClick()
-              }
-
-              val listener =
-                  ClickListener {
-                      println("Clicked")
-                  }
-      */
 
         // =========================================================
-        // 9. Sealed Class
+        // 9. Sealed Class (Restricted Hierarchy)
         // =========================================================
 
         /*
-         * Restricted class hierarchy.
-         *
-         * Useful for:
-         * - state management
-         * - exhaustive when
+         * Restricted class hierarchy for compile-time safety in 'when'.
+         * (See sealedClassesExample() for full network state demo).
          */
-        /*
-                sealed class Result
-                class Success : Result()
-                class Error : Result()
 
-                fun handle(result: Result) {
+        fun handleResult(state: ResultState) {
+            when (state) {
+                is ResultState.Success -> println("Success")
+                is ResultState.Error -> println("Error: ${state.message}")
+            } // Exhaustive: No 'else' required!
+        }
 
-                    when (result) {
-
-                        is Success ->
-                            println("Success")
-
-                        is Error ->
-                            println("Error")
-                    }
-
-                    /*
-                     * No else required.
-                     */
-                }
-                */
+        handleResult(ResultState.Success)
+        handleResult(ResultState.Error("Network Timeout"))
 
 
         // =========================================================
@@ -2617,6 +2622,28 @@ class MainActivity : AppCompatActivity() {
          * fun interface
          * -> SAM support
          */
+    }
+
+    // Support interfaces & classes for abstractAndInterface()
+    interface Printer {
+        fun print()
+    }
+
+    class FilePrinter : Printer {
+        override fun print() {
+            println("Printing from file")
+        }
+    }
+
+    class Manager(private val printer: Printer) : Printer by printer
+
+    fun interface ClickListener {
+        fun onClick()
+    }
+
+    sealed class ResultState {
+        object Success : ResultState()
+        data class Error(val message: String) : ResultState()
     }
 
 
@@ -2994,7 +3021,7 @@ class MainActivity : AppCompatActivity() {
         val charArr = charArrayOf('A', 'B', 'C')
         val booleanArr = booleanArrayOf(true, false, true)
         // ⚡ These map directly to Java primitives → int[], double[], etc.
-        // ⚡ Use in algorithms or loops for better memory and speed
+        // ⚡ Use in algorithms or loops for better memory and  speed
         // ⚠️ Cannot store nulls since primitives can’t be null
         //
         // 🧩 Note:
@@ -4086,9 +4113,9 @@ class MainActivity : AppCompatActivity() {
         //Normal Functions
         normalFunc(5, 4);
 
-        //These two functions are used , they are same function but it can be used as inline function
-        inlineFunc(5, 6);
-        inlineFuncAlt(5, 6);
+        // Single-Expression Functions (functions that consist of a single expression)
+        singleExpressionFunc(5, 6);
+        singleExpressionFuncAlt(5, 6);
 
 
         //In kotlin we can assign the function itself to a var , means a variable can hold a function
@@ -4104,17 +4131,38 @@ class MainActivity : AppCompatActivity() {
         return a + b;
     }
 
-    //Here, till return type Int , this function is same as normal , but instead of writing
-    // a+b in body and then returning it, we can directly assign the value to Int itself.
-    private fun inlineFunc(a: Int, b: Int): Int = a + b
+    // Single-Expression Function with explicit return type Int:
+    private fun singleExpressionFunc(a: Int, b: Int): Int = a + b
 
-    //or this can also be used, both are same, here we know a+b will always be int, so, no need
-    // for returntype
-    private fun inlineFuncAlt(a: Int, b: Int) = a + b
+    // Single-Expression Function with inferred return type (Int):
+    private fun singleExpressionFuncAlt(a: Int, b: Int) = a + b
 
 
     private fun sealedClassesExample() {
         Log.d(TAG, "--- Sealed Classes Example ---")
+
+        /*
+        * SEALED CLASS = a class with a RESTRICTED, known-in-advance set of subclasses.
+        *
+        * Why it exists:
+        * - Normal inheritance is open: anyone, anywhere can extend your class, so a
+        *   'when' over subtypes can never be exhaustive - you always need 'else'.
+        * - Sealed class locks the hierarchy: all direct subclasses must be declared
+        *   INSIDE the sealed class (or in the same package/module, Kotlin 1.5+).
+        * - The compiler then KNOWS every possible subtype, so 'when' becomes
+        *   EXHAUSTIVE: no 'else' needed, and adding a new subtype breaks compilation
+        *   everywhere you forgot to handle it. This is compile-time safety.
+        *
+        * Key rules (interview edge cases):
+        * - A sealed class is abstract by itself - you cannot instantiate it directly.
+        * - Its constructor is PRIVATE by default - you cannot inherit from outside
+        *   the allowed set (that's the whole point).
+        * - Subclasses must be declared in the same package (Kotlin 1.5+).
+        * - Subclasses can be data class, object, or regular class - mix freely.
+        * - Sealed class CAN have state/properties (unlike sealed interface).
+        * - 'when' over a sealed hierarchy as an EXPRESSION requires exhaustiveness
+        *   (no else) - as a statement, the compiler only warns if a case is missing.
+        * */
 
         // Create instances of the different states defined in our sealed class
         val successResult: NetworkResult = NetworkResult.Success("User data loaded successfully")
@@ -4128,6 +4176,40 @@ class MainActivity : AppCompatActivity() {
         handleNetworkResult(errorResult)
         handleNetworkResult(loadingResult)
         handleNetworkResult(unauthorizedResult)
+
+        // ---------------------------------------------------------
+        // Edge case 1: 'when' as an EXPRESSION must be exhaustive (no else needed)
+        // ---------------------------------------------------------
+        val label = when (errorResult) {
+            is NetworkResult.Success -> "success"
+            is NetworkResult.Error -> "error"
+            is NetworkResult.Loading -> "loading"
+            is NetworkResult.Unauthorized -> "unauthorized"
+            is NetworkResult.Timeout -> "timeout"
+        }
+        println(label) // error
+
+        // ---------------------------------------------------------
+        // Edge case 2: smart-casting - after 'is', the compiler casts for you
+        // ---------------------------------------------------------
+        if (errorResult is NetworkResult.Error) {
+            // No cast needed - errorResult is already NetworkResult.Error here
+            println("Code = ${errorResult.code}")
+        }
+
+        // ---------------------------------------------------------
+        // Edge case 3: comparing singletons - use === for object subtypes
+        // ---------------------------------------------------------
+        // NetworkResult.Loading is a SINGLETON - there is only one instance ever.
+        // So '===' (reference equality) is safe and idiomatic for object states:
+        println(loadingResult === NetworkResult.Loading) // true
+
+        // ---------------------------------------------------------
+        // Edge case 4: sealed class with STATE (shared property in the parent)
+        // ---------------------------------------------------------
+        // Unlike a sealed interface, a sealed class can hold common state:
+        val timedOut = NetworkResult.Timeout(5000)
+        println("Elapsed = ${timedOut.elapsedMs}, sealed parent state = ${timedOut.tag}")
     }
 
     // Sealed classes are perfect for modeling states that can hold different data.
@@ -4135,6 +4217,10 @@ class MainActivity : AppCompatActivity() {
 // Error (with a message), or Loading.
 // All direct subclasses MUST be inside this sealed class or in the same file.
     sealed class NetworkResult {
+        // Common state living in the sealed parent - shared by ALL subtypes.
+        // (This is possible because a sealed class is a real class, unlike an interface.)
+        open val tag: String = "NetworkResult"
+
         // A 'data class' is great for states that hold data.
         data class Success(val data: String) : NetworkResult()
 
@@ -4147,6 +4233,9 @@ class MainActivity : AppCompatActivity() {
 
         // You can also have a regular class as a subclass.
         class Unauthorized(val reason: String) : NetworkResult()
+
+        // A subclass with its own extra state.
+        class Timeout(val elapsedMs: Long) : NetworkResult()
     }
 
     fun handleNetworkResult(result: NetworkResult) {
@@ -4168,6 +4257,10 @@ class MainActivity : AppCompatActivity() {
 
             is NetworkResult.Unauthorized -> {
                 Log.d(TAG, "Unauthorized: ${result.reason}. Please log in again.")
+            }
+
+            is NetworkResult.Timeout -> {
+                Log.d(TAG, "Timeout after ${result.elapsedMs} ms")
             }
             // No 'else' branch is needed because all cases are covered.
         }
@@ -4247,6 +4340,1120 @@ class MainActivity : AppCompatActivity() {
             // We only allow positive ages under 130
             newValue > 0 && newValue < 130
         }
+    }
+
+    // =========================================================
+    // 1. ENUM CLASSES
+    // =========================================================
+    private fun enumClasses() {
+
+        /*
+        * Enum class = a class that has a FIXED, known set of instances,
+        * declared at compile time. Every value you write is a singleton object.
+        *
+        * Use enum when the set of values is small and closed, e.g. days of week,
+        * order status, screen state. The compiler KNOWS all possible values.
+        *
+        * Key rules:
+        * - Enum constants are separated by commas, the list ends with a semicolon.
+        * - An enum class CANNOT be inherited (it is final by default).
+        * - Enums CAN implement interfaces, and each constant can override methods.
+        * - Every enum constant automatically has: name (String) and ordinal (Int position).
+        * - Enums can have constructors, properties and methods like normal classes.
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Basic enum with constructor and method
+        // ---------------------------------------------------------
+        val today = Day.MONDAY
+
+        // 'name' and 'ordinal' come free with every enum constant.
+        println("${today.name} is position ${today.ordinal}") // MONDAY is position 0
+        println(today.isWeekend()) // false
+
+        // ---------------------------------------------------------
+        // 2. values() and valueOf()
+        // ---------------------------------------------------------
+
+        // values() -> array of ALL constants, in declaration order.
+        for (day in Day.values()) {
+            print("${day.name} ")
+        }
+        println()
+
+        // valueOf(name) -> converts a String back to the enum constant.
+        // Throws IllegalArgumentException if the name does not match exactly.
+        val parsed = Day.valueOf("FRIDAY")
+        println(parsed) // FRIDAY
+
+        // Safe alternative: entries / valueOfOrNull style lookup.
+        val safeParsed = Day.entries.firstOrNull { it.name == "SUNDAY" }
+        println(safeParsed) // SUNDAY
+
+        // ---------------------------------------------------------
+        // 3. Each constant can override methods (enum polymorphism)
+        // ---------------------------------------------------------
+        println(Day.SATURDAY.isWeekend()) // true
+        println(Day.MONDAY.isWeekend())   // false
+
+        // ---------------------------------------------------------
+        // 4. when works perfectly with enum (exhaustive, no else needed)
+        // ---------------------------------------------------------
+        val message = when (today) {
+            Day.MONDAY -> "Start of week"
+            Day.FRIDAY -> "Almost weekend"
+            Day.SATURDAY, Day.SUNDAY -> "Weekend!"
+            else -> "Regular day"
+        }
+        println(message)
+
+        /*
+        * INTERVIEW: enum vs sealed class
+        * - enum    -> each constant is a SINGLETON, all constants share the SAME type,
+        *              cannot hold different data per constant (only fixed constructor params).
+        * - sealed  -> each subtype is a DIFFERENT class, can hold DIFFERENT data per subtype,
+        *              and subtypes can themselves be data classes/objects.
+        * Rule of thumb: fixed set of simple constants -> enum.
+        *                fixed set of STATES with different data -> sealed.
+        * */
+    }
+
+    enum class Day(val isWeekendDefault: Boolean = false) {
+        MONDAY,          // uses default constructor value
+        TUESDAY,
+        WEDNESDAY,
+        THURSDAY,
+        FRIDAY,
+        SATURDAY(true),  // passes custom value
+        SUNDAY(true);
+
+        // Enum classes can have methods and properties like normal classes.
+        fun isWeekend(): Boolean = isWeekendDefault || this == Day.SUNDAY
+    }
+
+    // =========================================================
+    // 2. OBJECT EXPRESSIONS (Anonymous Objects)
+    // =========================================================
+    private fun objectExpressions() {
+
+        /*
+        * object EXPRESSION = creating an object of an anonymous class on the spot.
+        * "object : SomeType { ... }" means: give me a one-off object that implements
+        * SomeType right here, without declaring a named class.
+        *
+        * This is Kotlin's replacement for Java's anonymous inner classes, e.g.
+        * button.setOnClickListener(object : View.OnClickListener { ... })
+        *
+        * Rules:
+        * - The object expression can implement one or more interfaces, and/or extend a class.
+        * - It CANNOT have a constructor.
+        * - It is created fresh EVERY time the expression runs (not a singleton!).
+        *   This is the key difference from object DECLARATION (which is a singleton).
+        * - Inside, you can access variables from the surrounding scope (closure).
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Implementing an interface anonymously
+        // ---------------------------------------------------------
+        val greeter = object : Greeter {
+            override fun greet(name: String): String {
+                return "Hello, $name!"
+            }
+        }
+        println(greeter.greet("Kotlin")) // Hello, Kotlin!
+
+        // ---------------------------------------------------------
+        // 2. Object with NO supertype (just a one-off object)
+        // ---------------------------------------------------------
+        val counter = object {
+            var count = 0
+            fun increment() {
+                count++
+            }
+        }
+        counter.increment()
+        counter.increment()
+        println("Count = ${counter.count}") // Count = 2
+
+        // ---------------------------------------------------------
+        // 3. Accessing outer variables (closure) - like Java but without 'final' restriction
+        // ---------------------------------------------------------
+        var clicks = 0
+        val clickHandler = object : Greeter {
+            override fun greet(name: String): String {
+                clicks++ // Kotlin allows modifying outer var (Java anonymous class cannot)
+                return "Clicked $clicks times"
+            }
+        }
+        clickHandler.greet("x")
+        clickHandler.greet("y")
+        println("Total clicks = $clicks") // Total clicks = 2
+
+        /*
+        * INTERVIEW: object DECLARATION vs object EXPRESSION
+        * - object CustomersData { }   -> singleton, created once, lazy (on first access)
+        * - object : Greeter { }       -> anonymous instance, new object every time
+        * */
+    }
+
+    interface Greeter {
+        fun greet(name: String): String
+    }
+
+    // =========================================================
+    // 3. NESTED vs INNER CLASSES
+    // =========================================================
+    private fun nestedAndInnerClasses() {
+
+        /*
+        * NESTED class = class declared inside another class WITHOUT 'inner'.
+        * - It does NOT hold any reference to the outer class.
+        * - You cannot access outer class members from inside it.
+        * - Behaves like Java's 'static' nested class.
+        *
+        * INNER class = class declared with 'inner' keyword.
+        * - It HOLDS a reference to the outer class instance.
+        * - It CAN access outer class members (even private ones).
+        * - It can only be created via an outer instance: outer.Inner()
+        *
+        * Why does Kotlin need 'inner' keyword at all?
+        * Because nested classes are static-like by default (unlike Java where
+        * nested classes are inner by default). This avoids accidental memory leaks:
+        * an inner class holds a hidden reference to the outer object, which can
+        * keep an Activity alive if misused.
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Nested class - created independently of outer instance
+        // ---------------------------------------------------------
+        val nested = Outer.Nested()
+        nested.show() // Nested: no access to outer
+
+        // ---------------------------------------------------------
+        // 2. Inner class - needs an outer instance to exist
+        // ---------------------------------------------------------
+        val outer = Outer()
+        outer.name = "Outer A"
+        val inner = outer.Inner()   // note: created FROM an outer instance
+        inner.show()                // Inner: my outer is Outer A
+
+        // ---------------------------------------------------------
+        // 3. Inner class can access outer's private members too
+        // ---------------------------------------------------------
+        val secretReader = outer.SecretInner()
+        secretReader.readSecret() // Inner: secret is 42
+
+        /*
+        * INTERVIEW: memory leak angle
+        * - A nested class is safe to use in callbacks/threads (no outer reference).
+        * - An inner class keeps the outer object alive as long as the inner lives.
+        *   If outer is an Activity and inner is a long-lived Handler/Thread,
+        *   the Activity leaks. Prefer nested (static-like) classes for callbacks.
+        * */
+    }
+
+    class Outer {
+        var name: String = ""
+        private val secret = 42
+
+        class Nested {   // no 'inner' -> no reference to Outer
+            fun show() {
+                println("Nested: no access to outer")
+                // println(name) // ❌ ERROR: cannot access outer instance members
+            }
+        }
+
+        inner class Inner {  // holds reference to outer instance
+            fun show() {
+                // 'this@Outer' refers to the outer instance explicitly
+                println("Inner: my outer is ${this@Outer.name}")
+            }
+        }
+
+        inner class SecretInner {
+            fun readSecret() {
+                // inner class can even access outer's private members
+                println("Inner: secret is $secret")
+            }
+        }
+    }
+
+    // =========================================================
+    // 4. ERROR HANDLING (try/catch/finally, throw, custom exceptions, runCatching)
+    // =========================================================
+    private fun errorHandling() {
+
+        /*
+        * Kotlin error handling is similar to Java but with important differences:
+        *
+        * - try/catch/finally works the same, but 'try' is an EXPRESSION in Kotlin,
+        *   meaning it can return a value.
+        * - Kotlin has NO checked exceptions (unlike Java 'throws'). Any function can
+        *   throw anything; the compiler does not force you to catch.
+        * - 'throw' is also an expression (its type is Nothing - see nothingAndUnit()).
+        * - Idiomatic Kotlin prefers runCatching/Result over raw try/catch in APIs.
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Basic try/catch/finally
+        // ---------------------------------------------------------
+        try {
+            val result = 10 / 0   // ArithmeticException
+            println(result)
+        } catch (e: ArithmeticException) {
+            println("Caught: ${e.message}") // Caught: / by zero
+        } finally {
+            // finally ALWAYS runs - used for cleanup (closing resources etc.)
+            println("finally always runs")
+        }
+
+        // ---------------------------------------------------------
+        // 2. try as an EXPRESSION (returns a value)
+        // ---------------------------------------------------------
+        val number = try {
+            "123".toInt()
+        } catch (e: NumberFormatException) {
+            0   // fallback value if parsing fails
+        }
+        println("Parsed = $number") // 123
+
+        // ---------------------------------------------------------
+        // 3. Multiple catch blocks - order matters (child before parent)
+        // ---------------------------------------------------------
+        try {
+            val list = emptyList<Int>()
+            list.first()   // NoSuchElementException
+        } catch (e: NoSuchElementException) {
+            println("Specific: ${e.javaClass.simpleName}")
+        } catch (e: Exception) {
+            println("Generic: ${e.javaClass.simpleName}")
+        }
+        // If you put catch(Exception) FIRST, the specific one becomes unreachable code.
+
+        // ---------------------------------------------------------
+        // 4. throw + custom exception
+        // ---------------------------------------------------------
+        // Custom exception = just extend Exception (or RuntimeException).
+        class InsufficientBalanceException(message: String) : Exception(message)
+
+        fun withdraw(balance: Int, amount: Int): Int {
+            if (amount > balance) {
+                throw InsufficientBalanceException("Need ${amount - balance} more")
+            }
+            return balance - amount
+        }
+
+        val remaining = withdraw(100, 30)
+        println("Remaining = $remaining") // 70
+
+        // ---------------------------------------------------------
+        // 5. runCatching - idiomatic, returns Result (no crash, no try noise)
+        // ---------------------------------------------------------
+
+        // runCatching wraps the block: success -> Result.success(value),
+        // any exception -> Result.failure(exception). Nothing crashes.
+        val result: Result<Int> = runCatching { "abc".toInt() }
+        println(result.isSuccess) // false
+        println(result.exceptionOrNull()?.javaClass?.simpleName) // NumberFormatException
+
+        // Typical usage with getOrDefault / getOrNull / onSuccess / onFailure:
+        val safeValue = result.getOrDefault(-1)
+        println("Safe value = $safeValue") // 0 fallback -> -1
+
+        result
+            .onSuccess { println("Got $it") }
+            .onFailure { println("Failed with ${it.javaClass.simpleName}") }
+
+        // ---------------------------------------------------------
+        // 6. require / check / error - Kotlin's built-in guard idioms
+        // ---------------------------------------------------------
+
+        // require(): validates ARGUMENTS. Throws IllegalArgumentException.
+        fun setAge(age: Int) {
+            require(age in 0..130) { "Age must be 0..130, got $age" }
+        }
+        // check(): validates STATE. Throws IllegalStateException.
+        fun save() {
+            check(isSaved == false) { "Already saved" }
+        }
+        // error(): marks an impossible path. Throws IllegalStateException.
+        fun getSomething(x: Int): String = when (x) {
+            1 -> "one"
+            else -> error("Unexpected value $x")
+        }
+
+        setAge(25)
+        save()
+        println(getSomething(1))
+
+        /*
+        * INTERVIEW: require vs check
+        * - require -> "the CALLER passed a bad argument" (IllegalArgumentException)
+        * - check   -> "MY object is in a wrong state"     (IllegalStateException)
+        * */
+    }
+
+    private var isSaved = false
+
+    // =========================================================
+    // 5. DEFAULT ARGUMENTS, NAMED ARGUMENTS, VARARG
+    // =========================================================
+    private fun defaultNamedVarargArgs() {
+
+        /*
+        * DEFAULT ARGUMENTS: parameters can have default values, so callers can skip them.
+        * This removes the need for Java-style method overloading (5 constructors doing
+        * the same thing). Kotlin generates the overloads for you.
+        *
+        * NAMED ARGUMENTS: you can pass arguments as name = value in any order, and it
+        * becomes self-documenting. Very common in Jetpack Compose and Android APIs.
+        *
+        * VARARG: a parameter marked 'vararg' accepts any number of values of that type.
+        * Inside the function it is visible as an Array<out T>.
+        * SPREAD OPERATOR (*): passes an existing array's elements as individual vararg
+        * values. Only ONE spread is allowed per call, and it must not be mixed with
+        * positional args of the same type before it.
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Default arguments - skip params that have defaults
+        // ---------------------------------------------------------
+        greet()                          // Hello, Guest from Unknown
+        greet("Harshit")                 // Hello, Harshit from Unknown
+        greet("Harshit", "Jodhpur")      // Hello, Harshit from Jodhpur
+
+        // ---------------------------------------------------------
+        // 2. Named arguments - pick which ones to pass, in any order
+        // ---------------------------------------------------------
+        greet(city = "Delhi")            // Hello, Guest from Delhi
+        greet(prefix = "Hi", name = "Sam") // Hi, Sam from Unknown
+
+        // ---------------------------------------------------------
+        // 3. vararg - pass as many values as you want
+        // ---------------------------------------------------------
+        println(sum(1, 2, 3))            // 6
+        println(sum())                   // 0
+        println(sum(10, 20, 30, 40, 50)) // 150
+
+        // ---------------------------------------------------------
+        // 4. Spread operator - pass an array into a vararg parameter
+        // ---------------------------------------------------------
+        val numbers = intArrayOf(1, 2, 3)
+        println(sum(*numbers))           // 6
+
+        // You can even mix spread with extra values:
+        println(sum(*numbers, 4, 5))     // 15
+
+        // ---------------------------------------------------------
+        // 5. vararg is NOT necessarily the last parameter (unlike Java)
+        //    but then callers MUST use named arguments for the rest
+        // ---------------------------------------------------------
+        printInfo(*numbers, label = "My numbers") // label=My numbers, count=3
+
+        /*
+        * INTERVIEW: why named arguments matter in Android
+        * - Compose functions have 20+ parameters; named args make calls readable.
+        * - Default arguments kill constructor/telescoping overloads.
+        * - @JvmOverloads: needed so JAVA callers also get the overloads
+        *   (Kotlin defaults are not visible to Java without this annotation).
+        * */
+    }
+
+    // Default params: name = "Guest", city = "Unknown", prefix = "Hello"
+    private fun greet(name: String = "Guest", city: String = "Unknown", prefix: String = "Hello") {
+        println("$prefix, $name from $city")
+    }
+
+    private fun sum(vararg numbers: Int): Int {
+        var total = 0
+        for (n in numbers) total += n
+        return total
+    }
+
+    private fun printInfo(vararg values: Int, label: String) {
+        println("label=$label, count=${values.size}")
+    }
+
+    // =========================================================
+    // 6. DESTRUCTURING DECLARATIONS
+    // =========================================================
+    private fun destructuring() {
+
+        /*
+        * Destructuring = splitting an object into multiple variables in ONE statement.
+        *
+        * val (a, b) = somePair
+        *
+        * How it works internally: Kotlin calls component1(), component2(), ... on the
+        * object. Data classes generate componentN() automatically for every primary
+        * constructor property - that's why data classes destructuring works out of the box.
+        *
+        * Rules:
+        * - Use '_' to skip a component you don't need.
+        * - You can destructure in for loops, lambdas and map entries.
+        * - For classes without componentN(), you must define them manually (or use data class).
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Data class destructuring
+        // ---------------------------------------------------------
+        val user = SimpleUser("Harshit", 10)
+        val (name, id) = user   // calls user.component1() and user.component2()
+        println("Name = $name, Id = $id")
+
+        // Skip the second component with _
+        val (onlyName, _) = user
+        println("Only name = $onlyName")
+
+        // ---------------------------------------------------------
+        // 2. Destructuring in for loops (withIndex, map entries)
+        // ---------------------------------------------------------
+        val fruits = listOf("Apple", "Banana")
+        for ((index, fruit) in fruits.withIndex()) {
+            println("$index -> $fruit")
+        }
+
+        val map = mapOf("a" to 1, "b" to 2)
+        for ((key, value) in map) {   // Map.Entry has component1()/component2()
+            println("$key -> $value")
+        }
+
+        // ---------------------------------------------------------
+        // 3. Destructuring in lambdas
+        // ---------------------------------------------------------
+        val pairs = listOf(1 to "one", 2 to "two")
+        pairs.map { (num, word) -> "$num=$word" }.forEach { println(it) }
+
+        // ---------------------------------------------------------
+        // 4. Destructuring a Pair/Triple directly
+        // ---------------------------------------------------------
+        val (x, y) = 10 to 20
+        println("x = $x, y = $y")
+
+        // ---------------------------------------------------------
+        // 5. Custom componentN functions (works without data class)
+        // ---------------------------------------------------------
+        val point = Point3D(1, 2, 3)
+        val (px, py, pz) = point
+        println("px=$px, py=$py, pz=$pz")
+
+        /*
+        * INTERVIEW: destructuring does NOT use position by name - it uses POSITION.
+        * val (a, b) = user gives a = first property (name), b = second (id),
+        * regardless of what you name a and b. Also: destructuring a non-data class
+        * requires manual componentN() functions.
+        * */
+    }
+
+    class Point3D(val x: Int, val y: Int, val z: Int) {
+        // Manual operator conventions - data class would generate these automatically
+        operator fun component1() = x
+        operator fun component2() = y
+        operator fun component3() = z
+    }
+
+    // =========================================================
+    // 7. SEALED INTERFACE
+    // =========================================================
+    private fun sealedInterfaceExample() {
+
+        /*
+        * sealed INTERFACE = like a sealed class, but:
+        * - A class can implement MANY sealed interfaces (single inheritance limit gone).
+        * - No state/constructor - it is purely a contract.
+        * - Perfect for modeling "capabilities" or union types.
+        *
+        * All implementations must be in the same package (Kotlin 1.5+) or same module.
+        * The 'when' exhaustiveness works exactly like sealed class.
+        *
+        * INTERVIEW: sealed class vs sealed interface vs enum
+        * - enum             -> fixed set of SINGLETON constants, one shared type.
+        * - sealed class     -> fixed set of subtypes, each can hold state, single inheritance.
+        * - sealed interface -> fixed set of implementors, no state, a class can implement many.
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Basic sealed interface with data class/object implementors
+        // ---------------------------------------------------------
+        val events: List<UiEvent> = listOf(
+            UserClicked("btn_1"),
+            ScreenShown,
+            UserClicked("btn_2")
+        )
+
+        // Exhaustive when - compiler forces all cases, no 'else' needed.
+        for (event in events) {
+            when (event) {
+                is UserClicked -> println("User clicked: ${event.id}")
+                ScreenShown -> println("Screen was shown")
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 2. One class implementing MULTIPLE sealed interfaces
+        //    (impossible with sealed classes - single inheritance)
+        // ---------------------------------------------------------
+        val payment = UpiPayment("upi_123")
+        describePayment(payment)
+        // UpiPayment implements both Payable and Refundable sealed interfaces.
+
+        // ---------------------------------------------------------
+        // 3. Sealed interface + generic sealed hierarchy (common in MVI/Redux)
+        // ---------------------------------------------------------
+        val state: Loadable<String> = Loadable.Loaded("Kotlin")
+        when (state) {
+            is Loadable.Loading -> println("Loading...")
+            is Loadable.Loaded -> println("Loaded: ${state.data}")
+            is Loadable.Failed -> println("Failed: ${state.error}")
+        }
+    }
+
+    // Sealed interface for UI events
+    sealed interface UiEvent
+    data class UserClicked(val id: String) : UiEvent
+    object ScreenShown : UiEvent
+
+    // Two sealed interfaces - a class can implement both
+    sealed interface Payable {
+        val amount: Int
+    }
+
+    sealed interface Refundable {
+        val refundId: String
+    }
+
+    data class UpiPayment(val id: String) : Payable, Refundable {
+        override val amount = 100
+        override val refundId = "ref_$id"
+    }
+
+    // Generic sealed interface - union type for async results
+    sealed interface Loadable<out T> {
+        object Loading : Loadable<Nothing>
+        data class Loaded<T>(val data: T) : Loadable<T>
+        data class Failed(val error: String) : Loadable<Nothing>
+    }
+
+    // Accepts ANY Payable - this is why sealed interfaces shine:
+    // UpiPayment works here without UpiPayment-specific code.
+    fun describePayment(payment: Payable) {
+        println("Amount = ${payment.amount}")
+    }
+
+    // =========================================================
+    // 8. TYPE ALIASES
+    // =========================================================
+
+    // typealias gives an ALTERNATE NAME to an existing type.
+    // It does NOT create a new type - it is just a nickname, fully interchangeable.
+    // Used to shorten long generic types and make code self-documenting.
+    // NOTE: typealias must be written at TOP-LEVEL (outside any class) -
+    // Kotlin does not support nested/local type aliases.
+    private fun typeAliasExample() {
+
+        /*
+        * typealias = a nickname for a type. Written at top-level (outside classes).
+        *
+        * Why it matters:
+        * - Long generic types like Map<String, List<Pair<Int, String>>> become unreadable.
+        * - A typealias makes intent clear: UserId is clearer than String.
+        * - It does NOT create a new type - UserId and String are 100% interchangeable.
+        *   (This is the difference from 'value class' which DOES create a new type.)
+        *
+        * Common in Android: typealias Callback = (Result) -> Unit
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Simple alias - interchangeable with the original type
+        // ---------------------------------------------------------
+        val id: UserId = "user_42"
+        val same: String = id   // ✅ no conversion needed - it IS a String
+        println("Id = $id, length = ${same.length}")
+
+        // ---------------------------------------------------------
+        // 2. Aliasing a function type - makes HOF signatures readable
+        // ---------------------------------------------------------
+        val onClick: ClickAction = { name -> println("Clicked: $name") }
+        onClick("Save") // Clicked: Save
+
+        // ---------------------------------------------------------
+        // 3. Aliasing a generic collection type
+        // ---------------------------------------------------------
+        val users: UserMap = mapOf("u1" to "Harshit", "u2" to "Sam")
+        println(users)
+
+        /*
+        * INTERVIEW: typealias vs value class
+        * - typealias    -> compile-time nickname only, zero runtime cost, zero type safety gain.
+        * - value class  -> real new type at compile time (prevents mixing up types), tiny
+        *                   runtime wrapper (see valueClassExample()).
+        * */
+    }
+
+    // =========================================================
+    // 9. INFIX FUNCTIONS & OPERATOR OVERLOADING
+    // =========================================================
+    private fun infixAndOperatorOverloading() {
+
+        /*
+        * INFIX function = a member/extension function with ONE parameter that can be
+        * called WITHOUT dot and parentheses:  a methodName b
+        *
+        * You already use one everywhere:  1 to "one"
+        * 'to' is just an infix function in the standard library that creates a Pair!
+        *
+        * Rules:
+        * - Must be a member or extension function.
+        * - Must have exactly ONE parameter (no vararg, no default value).
+        * - Marked with the 'infix' keyword.
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Custom infix function
+        // ---------------------------------------------------------
+        val student = Studentt()
+        val result = student took "Mathematics"
+        println(result) // Steve took Mathematics
+
+        // The famous 'to' - it is infix too:
+        val pair = 1 to "one"
+        println(pair) // (1, one)
+
+        // ---------------------------------------------------------
+        // 2. OPERATOR OVERLOADING
+        // ---------------------------------------------------------
+
+        /*
+        * Kotlin lets your classes define how operators (+, -, [], ==, etc.) behave,
+        * by implementing functions marked 'operator' with FIXED names:
+        *
+        *   a + b    ->  a.plus(b)
+        *   a - b    ->  a.minus(b)
+        *   a[i]     ->  a.get(i)
+        *   a[i] = v ->  a.set(i, v)
+        *   a..b     ->  a.rangeTo(b)
+        *   a in b   ->  b.contains(a)
+        *   -a       ->  a.unaryMinus()
+        *   a()      ->  a.invoke()
+        *
+        * The names are fixed by the compiler - you cannot invent new operators.
+        * */
+
+        val wallet1 = Wallet(100)
+        val wallet2 = Wallet(50)
+
+        // '+' works because Wallet defines plus()
+        val total = wallet1 + wallet2
+        println(total) // Wallet(150)
+
+        // Comparison operators work because of compareTo()
+        println(Wallet(50) < Wallet(80)) // true
+
+        // 'in' works because of contains()
+        println(50 in Wallet(50)) // true
+
+        /*
+        * INTERVIEW: operator overloading is NOT magic - it maps to named functions.
+        * If a class defines plus(), you can write a + b. Kotlin does not allow
+        * inventing NEW operators - only overriding the fixed set with their
+        * predefined function names.
+        * */
+    }
+
+    // Infix extension on our own class
+    infix fun Studentt.took(subject: String): String = "Steve took $subject"
+
+    class Wallet(val balance: Int) : Comparable<Wallet> {
+
+        // a + b  ->  calls plus()
+        operator fun plus(other: Wallet): Wallet = Wallet(balance + other.balance)
+
+        // comparison -> calls compareTo (enables <, >, <=, >=)
+        override fun compareTo(other: Wallet): Int = balance - other.balance
+
+        // 'in' operator -> calls contains()
+        operator fun contains(amount: Int): Boolean = amount == balance
+
+        override fun toString(): String = "Wallet($balance)"
+    }
+
+    // =========================================================
+    // 10. Nothing vs Unit
+    // =========================================================
+    private fun nothingAndUnit() {
+
+        /*
+        * Unit = "this function returns NOTHING useful" (like Java's void, but a real type).
+        * Every function returns something in Kotlin - if there is no meaningful result,
+        * the return type is Unit.
+        *
+        * Nothing = "this code NEVER completes normally". It has NO instance at all.
+        * Used for functions that ALWAYS throw or loop forever.
+        *
+        * Why Nothing matters to the compiler:
+        * - Nothing is a subtype of EVERY type in Kotlin.
+        * - So a function returning Nothing can be used anywhere any type is expected.
+        * - This is how the compiler knows code after 'throw' or 'error()' is unreachable.
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Unit - default return type when nothing meaningful is returned
+        // ---------------------------------------------------------
+        fun printSum(a: Int, b: Int): Unit {   // ': Unit' is optional
+            println(a + b)
+        }
+        printSum(2, 3) // 5
+
+        // Unit is an actual object, so it can be returned/stored:
+        val unitValue: Unit = printSum(1, 2)
+        println(unitValue) // kotlin.Unit
+
+        // ---------------------------------------------------------
+        // 2. Nothing - functions that NEVER return
+        // ---------------------------------------------------------
+
+        // fail() can be used anywhere a String is expected, because
+        // Nothing is a subtype of every type - the compiler knows
+        // execution will never continue past it.
+        fun fail(message: String): Nothing {
+            throw IllegalArgumentException(message)
+        }
+
+        val name: String = "Kotlin"
+        val checked = if (name.isEmpty()) fail("Name was empty") else name
+        println(checked) // Kotlin
+
+        // ---------------------------------------------------------
+        // 3. Nothing? - the type of 'null' literal itself
+        // ---------------------------------------------------------
+
+        // 'null' has type Nothing? - it can be assigned to any nullable type.
+        val nothingOrNull: Nothing? = null
+
+        // ---------------------------------------------------------
+        // 4. Practical use: TODO() and error() return Nothing
+        // ---------------------------------------------------------
+
+        // TODO() returns Nothing - that's why the compiler doesn't complain
+        // about the missing return below.
+        fun notImplementedYet(x: Int): Int {
+            TODO("implement later")
+        }
+
+        // It DOES throw at runtime - we catch it here so the demo doesn't
+        // crash the app. The point stands: the compiler is fine with the
+        // missing return because TODO() has type Nothing.
+        val todoResult: Int = try {
+            notImplementedYet(1)
+        } catch (e: NotImplementedError) {
+            -1 // sentinel: proves TODO() threw NotImplementedError
+        }
+        println("notImplementedYet threw NotImplementedError as expected: ${todoResult == -1}")
+
+        /*
+        * INTERVIEW: Nothing vs Unit
+        * - Unit   -> function completes, but result is meaningless (one instance: Unit).
+        * - Nothing-> function NEVER completes (throws or loops forever), no instance exists.
+        * - Nothing is the BOTTOM type: subtype of all types. Nothing? is the type of null.
+        * - 'return fail()' compiles because Nothing fits any expected return type.
+        * */
+    }
+
+    // =========================================================
+    // 11. CUSTOM PROPERTY DELEGATE
+    // =========================================================
+    private fun customPropertyDelegate() {
+
+        /*
+        * You already saw Delegates.observable/vetoable. But the senior-level skill is
+        * writing your OWN delegate.
+        *
+        * A delegate is just a class that implements:
+        * - ReadOnlyProperty  -> for val (needs getValue operator)
+        * - ReadWriteProperty -> for var (needs getValue + setValue operators)
+        *
+        * The 'by' keyword connects the property to the delegate:
+        *   var name: String by MyDelegate()
+        *
+        * Every read calls getValue(), every write calls setValue().
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Custom delegate that logs every read/write
+        // ---------------------------------------------------------
+        val settings = Settings()
+        settings.theme = "dark"     // setValue logs: theme <- dark
+        println(settings.theme)     // getValue logs, prints: dark
+
+        // ---------------------------------------------------------
+        // 2. Custom delegate with validation (like vetoable, but ours)
+        // ---------------------------------------------------------
+        val account = Account()
+        account.balance = 500   // ✅ accepted
+        account.balance = -50   // ❌ rejected, stays 500
+        println("Balance = ${account.balance}") // 500
+
+        /*
+        * INTERVIEW: what does 'by' actually compile to?
+        * var x: T by Delegate() roughly becomes:
+        *   private val delegate = Delegate()
+        *   var x: T
+        *       get() = delegate.getValue(this, ::x)
+        *       set(v) = delegate.setValue(this, ::x, v)
+        * The delegate receives the owner object and the property metadata on every access.
+        * */
+    }
+
+    // Simple read/write delegate that logs access
+    private class LoggingDelegate<T> : ReadWriteProperty<Any?, T> {
+
+        private var value: T? = null
+
+        override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+            println("Reading '${property.name}'")
+            return value as T   // simple version - real code would handle null properly
+        }
+
+        override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+            println("Writing '${property.name}' = $value")
+            this.value = value
+        }
+    }
+
+    class Settings {
+        var theme: String by LoggingDelegate()
+    }
+
+    // Delegate that can REJECT invalid values (vetoable-style)
+    private class PositiveIntDelegate(initial: Int) : ReadWriteProperty<Any?, Int> {
+
+        private var value = initial
+
+        override fun getValue(thisRef: Any?, property: KProperty<*>): Int = value
+
+        override fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
+            if (value >= 0) {
+                this.value = value
+            } else {
+                println("Rejected negative value: $value")
+            }
+        }
+    }
+
+    class Account {
+        var balance: Int by PositiveIntDelegate(0)
+    }
+
+    // =========================================================
+    // 12. SEQUENCE vs COLLECTION
+    // =========================================================
+    private fun sequenceVsCollection() {
+
+        /*
+        * Collections are EAGER: every operation runs immediately and creates a NEW
+        * intermediate list. list.filter{}.map{} creates 2 intermediate lists.
+        *
+        * Sequences are LAZY: nothing runs until a terminal operation (toList, first...).
+        * Elements flow ONE BY ONE through the whole chain - no intermediate lists.
+        *
+        * Rule of thumb:
+        * - Small collections -> plain collection functions (simpler, fast enough).
+        * - Big collections / multiple chained operations -> asSequence() to save memory.
+        * */
+
+        val numbers = listOf(1, 2, 3, 4, 5, 6, 7, 8)
+
+        // ---------------------------------------------------------
+        // 1. EAGER collection - intermediate lists are created
+        // ---------------------------------------------------------
+
+        // Step 1: filter runs on ALL elements -> new list [2, 4, 6]
+        // Step 2: map runs on that new list -> another new list [4, 8, 12]
+        val eager = numbers.filter { it % 2 == 0 }.map { it * 10 }
+        println(eager) // [4, 8, 12]
+
+        // ---------------------------------------------------------
+        // 2. LAZY sequence - one element at a time through the chain
+        // ---------------------------------------------------------
+
+        // For element 1: 1 -> filter(no) -> dropped.
+        // For element 2: 2 -> filter(yes) -> map -> 4.
+        // No intermediate lists are ever created.
+        val lazy = numbers.asSequence()
+            .filter { it % 2 == 0 }
+            .map { it * 10 }
+            .toList()   // terminal operation - nothing ran before this line
+        println(lazy) // [20, 40, 60]
+
+        // ---------------------------------------------------------
+        // 3. Why sequences matter: short-circuit with terminal ops
+        // ---------------------------------------------------------
+
+        // With a collection, filter would process ALL 1M elements first.
+        // With a sequence, it stops at the FIRST match - huge saving.
+        val bigList = generateSequence(1) { it + 1 }   // infinite sequence!
+        val firstSquareOver100 = bigList
+            .map { it * it }
+            .first { it > 100 }   // terminal - stops as soon as found
+        println(firstSquareOver100) // 121
+
+        // A collection CANNOT do this - an infinite list would never finish building.
+
+        // ---------------------------------------------------------
+        // 4. generateSequence - sequences from a seed
+        // ---------------------------------------------------------
+        val powers = generateSequence(1) { it * 2 }.take(5).toList()
+        println(powers) // [1, 2, 4, 8, 16]
+
+        /*
+        * INTERVIEW: when is a sequence SLOWER?
+        * - For tiny collections, sequence overhead (lambda calls per element)
+        *   can be slower than simple eager operations.
+        * - Also, some operations (like sorted()) are inherently eager even on sequences.
+        * Rule: use sequences for LARGE data + CHAINED operations, otherwise keep it simple.
+        * */
+    }
+
+    // =========================================================
+    // 12b. COLLECTION TRANSFORMATIONS (senior interview favorites)
+    // =========================================================
+    private fun collectionTransformations() {
+
+        /*
+        * These functions appear in almost every Android interview:
+        * groupBy, associateBy, associateWith, partition, sortedBy, take/drop.
+        * They convert a list into maps, pairs, or filtered/sorted views.
+        * */
+
+        data class Employee(val name: String, val dept: String, val salary: Int)
+
+        val employees = listOf(
+            Employee("Amit", "Android", 50),
+            Employee("Bina", "iOS", 45),
+            Employee("Chetan", "Android", 60),
+            Employee("Divya", "Backend", 55)
+        )
+
+        // ---------------------------------------------------------
+        // 1. groupBy - groups elements into a Map<Key, List<T>>
+        // ---------------------------------------------------------
+        // ---------------------------------------------------------
+        // 1. groupBy - groups elements into a Map<Key, List<T>>
+        // ---------------------------------------------------------
+        val byDept: Map<String, List<Employee>> = employees.groupBy { it.dept }
+        println(byDept.keys) // [Android, iOS, Backend]
+        println(byDept["Android"]?.size) // 2
+
+        // ---------------------------------------------------------
+        // 2. associateBy - Map<Key, T> (key from one property, value = whole element)
+        //    If two elements have the same key, the LAST one wins.
+        // ---------------------------------------------------------
+        val byName: Map<String, Employee> = employees.associateBy { it.name }
+        println(byName["Amit"]) // Employee(name=Amit, ...)
+
+        // ---------------------------------------------------------
+        // 3. associateWith - Map<T, V> (element itself as key)
+        // ---------------------------------------------------------
+        // ---------------------------------------------------------
+        // 3. associateWith - Map<T, V> (element itself as key)
+        // ---------------------------------------------------------
+        val salaryByName: Map<String, Int> = employees.associate { it.name to it.salary }
+        println(salaryByName) // {Amit=50, Bina=45, Chetan=60, Divya=55}
+
+        // ---------------------------------------------------------
+        // 4. partition - splits a list into (matching, non-matching) Pair
+        // ---------------------------------------------------------
+        val (android, others) = employees.partition { it.dept == "Android" }
+        println("Android devs: ${android.size}, others: ${others.size}") // 2, 2
+
+        // ---------------------------------------------------------
+        // 5. sortedBy / sortedByDescending - sort by a property
+        // ---------------------------------------------------------
+        val bySalary = employees.sortedBy { it.salary }
+        println(bySalary.first().name) // Bina (lowest salary)
+
+        // ---------------------------------------------------------
+        // 6. take / drop - first N / skip first N
+        // ---------------------------------------------------------
+        println(employees.take(2).size)  // 2
+        println(employees.drop(2).size)  // 2
+
+        // ---------------------------------------------------------
+        // 7. sumOf / maxByOrNull / minByOrNull - quick aggregations
+        // ---------------------------------------------------------
+        println(employees.sumOf { it.salary })          // 210
+        println(employees.maxByOrNull { it.salary }?.name) // Chetan
+        println(employees.minByOrNull { it.salary }?.name) // Bina
+
+        /*
+        * INTERVIEW: groupBy vs associateBy
+        * - groupBy     -> MANY values per key:  Map<Key, List<T>>
+        * - associateBy -> ONE value per key:    Map<Key, T> (last wins on duplicates)
+        * */
+    }
+
+    // =========================================================
+    // 13. VALUE CLASS (inline class)
+    // =========================================================
+
+    // A value class wraps ONE value. It gives you a REAL new type at compile time
+    // (type safety) with almost zero runtime cost - the wrapper usually disappears
+    // after compilation and only the raw Int remains.
+    @JvmInline
+    value class Meters(val value: Int)
+
+    @JvmInline
+    value class Kilometers(val value: Int)
+
+    private fun valueClassExample() {
+
+        /*
+        * value class = a performance-friendly wrapper around a SINGLE value.
+        *
+        * Problem it solves: passing raw Int/String everywhere is error-prone.
+        * Which argument is the distance and which is the speed? Both are Int!
+        *
+        * A value class creates a distinct compile-time type, so you CANNOT
+        * accidentally mix them up - but at runtime there is usually NO extra
+        * object allocated (the compiler uses the underlying Int directly).
+        *
+        * Rules:
+        * - Must have exactly ONE read-only ('val') property in the primary constructor.
+        * - Must be marked @JvmInline (Kotlin/JVM requirement).
+        * - Can have functions and implement interfaces.
+        * - Boxing happens only when used as a generic type / nullable.
+        * */
+
+        // ---------------------------------------------------------
+        // 1. Type-safe wrappers - cannot be mixed up
+        // ---------------------------------------------------------
+        val distance = Meters(500)
+        println(distance.value) // 500
+
+        // This would NOT compile - the compiler knows Meters and Int are different types:
+        // val wrong: Int = distance   // ❌ type mismatch
+
+        // ---------------------------------------------------------
+        // 2. Functions on the value class
+        // ---------------------------------------------------------
+        fun Meters.toKilometers(): Double = value / 1000.0
+        println(Meters(2500).toKilometers()) // 2.5
+
+        // ---------------------------------------------------------
+        // 3. Real-world use case: type-safe IDs
+        // ---------------------------------------------------------
+        fun sendNotification(userId: UserId, message: String) {
+            println("Sent to $userId: $message")
+        }
+        sendNotification("user_1", "Hello") // Sent to user_1: Hello
+
+        /*
+        * INTERVIEW: value class vs typealias
+        * - typealias  -> just a nickname, String and UserId are the SAME type, no safety.
+        * - value class-> a NEW type; Meters(500) is NOT an Int, compiler blocks mixing.
+        * - value class has near-zero cost: usually compiled to the raw primitive,
+        *   only boxed when nullable/generic context forces it.
+        * */
     }
 
     companion object {
