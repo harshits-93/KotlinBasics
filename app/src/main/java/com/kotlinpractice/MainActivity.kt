@@ -6,8 +6,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import kotlin.coroutines.EmptyCoroutineContext.get
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
+
+
 
 class MainActivity : AppCompatActivity() {
     /*
@@ -32,17 +35,18 @@ class MainActivity : AppCompatActivity() {
     *
     * */
 
+
     //Note here String is not-null type in kotlin, we cannot assign null value to string directly,
     //for that we use this --> var abc:String? = null, then it is possible.
 
     //So, w.r.t point 2.) if we add ? to String or any object type then, lateinit won't allow it.
-    //But below one is valid as
+    //But below one is valid
     lateinit var name: String
 
     /*++++
     * lazy keyword usage and rules.
     *
-    * In many scenarios we declare an variable and initialize it, but it is not used in the project,
+    * In many scenarios we declare a variable and initialize it, but it is not used in the project,
     * but it still occupies memory which is waste. For this we use lazy keyword.
     *
     * If we use lazy for initializing any variable, then its memory is allocated/occupied only when it is
@@ -68,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     //lazy initialization
     val city1: String by lazy { "abc" }
     val city2: String? by lazy { null }
-    val abc: Int by lazy { 10 }
+
 
     //Thread mode definitions:
     val data1 by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { "abc" }
@@ -104,6 +108,7 @@ class MainActivity : AppCompatActivity() {
       val city: String
           get() = cityDelegate.value
 
+
       ⚡ Runtime flow
       First time:
       println(city)
@@ -113,7 +118,7 @@ class MainActivity : AppCompatActivity() {
       - city getter called
       - cityDelegate.value accessed
       - { "abc" } executes
-      - Value stored (cached)
+      - value stored (cached)
       - "abc" returned
 
       Second time:
@@ -160,6 +165,7 @@ class MainActivity : AppCompatActivity() {
      * println(city.value)
      * */
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -169,6 +175,7 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
 
         //Most kotlin concepts covered.
         varValConst()
@@ -244,12 +251,14 @@ class MainActivity : AppCompatActivity() {
         // 2. Initialization inside init block
         // ---------------------------------------------------------
 
+
         class User {
             val country: String
 
             init {
                 country = "India"
             }
+
         }
 
         /*
@@ -296,6 +305,7 @@ class MainActivity : AppCompatActivity() {
          * A 'val' value can still be determined at runtime.
          * It simply cannot be reassigned afterward.
          */
+
 
         val runtimeValue: Double = Math.random()
 
@@ -476,6 +486,8 @@ class MainActivity : AppCompatActivity() {
          * - Value must be known before app runs
          * - Only primitive/String values allowed
          */
+
+
     }
 
     private fun nullSafety() {
@@ -537,7 +549,6 @@ class MainActivity : AppCompatActivity() {
          * Prevents NullPointerException.
          */
         println("Length = ${name?.length}")
-
 
         // =========================================================
         // 4. Safe Call with let ( ?.let )
@@ -626,6 +637,12 @@ class MainActivity : AppCompatActivity() {
         val invalidCast: Int? = data as? Int
         println(invalidCast) // null
 
+        //Note here, we are only casting here meaning "Is the value stored in data already an Int? If yes,
+        // cast it. Otherwise, return null."
+        //It does convert it, meaning from double to Int or so, for that we use toInt, toDouble etc.
+        //method.
+
+
         // =========================================================
         // Unsafe Cast ( as )
         // =========================================================
@@ -637,7 +654,7 @@ class MainActivity : AppCompatActivity() {
          * ClassCastException
          * if conversion fails.
          */
-        // val number = data as Int
+       //  val number = data as Int
         // ❌ Crash -> ClassCastException
 
 
@@ -661,11 +678,10 @@ class MainActivity : AppCompatActivity() {
             listOf("A", null, "B")
 
 
-        // List itself CAN be null
+        // List itself can be null
         // Elements cannot be null
 
-        val list2: List<String>? =
-            listOf("A", "B")
+        val list2: List<String>? = null
 
         /*
          * Read carefully:
@@ -682,8 +698,7 @@ class MainActivity : AppCompatActivity() {
         // 10. Filtering Null Values
         // =========================================================
 
-        val numbers: List<Int?> =
-            listOf(1, 2, null, 4)
+        val numbers: List<Int?> = listOf(1, 2, null, 4)
 
         /*
          * filterNotNull()
@@ -693,6 +708,7 @@ class MainActivity : AppCompatActivity() {
 
         val nonNullNumbers: List<Int> =
             numbers.filterNotNull()
+
 
         println(nonNullNumbers)
 
@@ -774,18 +790,18 @@ class MainActivity : AppCompatActivity() {
         data class Address(
             val city: String?
         )
+
         data class User(
             val address: Address?
         )
 
-        val user: User? =
-            User(Address("Mumbai"))
+        val user: User = User(Address("Mumbai"))
 
         /*
          * Chain safely through multiple nullable objects.
          */
-        val city =
-            user?.address?.city
+
+        val city = user?.address?.city?.length
         println(city)
 
 
@@ -850,8 +866,6 @@ class MainActivity : AppCompatActivity() {
          * 6. break / continue
          */
 
-
-
         // =========================================================
         // 1. if / else Statement
         // =========================================================
@@ -883,6 +897,41 @@ class MainActivity : AppCompatActivity() {
         }
         println(result)
 
+
+        // =========================================================
+        // Short-Circuit Operators: && and ||
+        // =========================================================
+
+        // && (AND): If the first condition is false,
+        // the second condition is NOT evaluated.
+        val age1 = 20
+
+        if (age1 >= 18 && age1 <= 60) {
+            println("Age is between 18 and 60")
+        }
+
+        // || (OR): If the first condition is true,
+        // the second condition is NOT evaluated.
+        val isWeekend = true
+        val isHoliday = false
+
+        if (isWeekend || isHoliday) {
+            println("Day off")
+        }
+
+        // Practical example: Null safety using short-circuit evaluation.
+        val name: String? = "Kotlin"
+
+        if (name != null && name.isNotEmpty()) {
+            println("Name is not empty: $name")
+        }
+
+        // Here, name.isNotEmpty() is evaluated only if name != null.
+        // Therefore, name can be safely accessed in the second condition.
+
+        // Remember:
+        // A && B -> B runs only when A is true.
+        // A || B -> B runs only when A is false.
 
 
         // =========================================================
@@ -940,10 +989,13 @@ class MainActivity : AppCompatActivity() {
         when {
             x < 0 ->
                 println("Negative")
+
             x in 1..10 ->
                 println("Between 1 and 10")
+
             x % 2 == 0 ->
                 println("Even Number")
+
             else ->
                 println("Other case")
         }
@@ -966,10 +1018,36 @@ class MainActivity : AppCompatActivity() {
         when (data) {
             is String ->
                 println("String of length ${data.length}")
+
             is Int ->
                 println("Integer")
+
             else ->
                 println("Unknown type")
+        }
+
+
+        // =========================================================
+        // when with Ranges and Membership Checks
+        // =========================================================
+
+        val number1 = 15
+
+        when (number1) {
+            in 1..10 -> println("Number is between 1 and 10")
+            in 11..20 -> println("Number is between 11 and 20")
+            !in 1..20 -> println("Number is outside 1 to 20")
+            else -> println("Number is in an unhandled range")
+        }
+
+        // `in` checks whether a value belongs to a range or collection.
+        // `!in` checks whether a value does NOT belong to it.
+
+        val fruits1 = listOf("Apple", "Mango", "Orange")
+
+        when ("Mango") {
+            in fruits1 -> println("Fruit exists in the list")
+            else -> println("Fruit does not exist in the list")
         }
 
         // =========================================================
@@ -1007,6 +1085,7 @@ class MainActivity : AppCompatActivity() {
         for (i in 1..5) {
             print("$i ")
         }
+
         println()
 
         // =========================================================
@@ -1070,8 +1149,7 @@ class MainActivity : AppCompatActivity() {
         // 7.6 Iterating Collections
         // =========================================================
 
-        val fruits =
-            listOf("Apple", "Banana", "Mango")
+        val fruits = listOf("Apple", "Banana", "Mango")
         /*
          * Direct item iteration.
          */
@@ -1123,6 +1201,42 @@ class MainActivity : AppCompatActivity() {
          * This uses:
          * destructuring declaration
          */
+
+
+        // =========================================================
+        // Reverse Iteration: Different Approaches
+        // =========================================================
+
+        val numbers = listOf(1, 2, 4, 7, 2, 4)
+
+        // 1. Index-based reverse iteration.
+        // No reversed-list copy is created.
+        // Useful when both the index and value are required.
+        for (index in numbers.lastIndex downTo 0) {
+            println("Index: $index, Item: ${numbers[index]}")
+        }
+
+
+        // 2. asReversed()
+        // Provides a reversed view of the list rather than
+        // creating a separate reversed list.
+        for (item in numbers.asReversed()) {
+            print("$item ")
+        }
+        println()
+
+        // 3. indices.reversed()
+        // Iterates through the valid indexes in reverse order.
+        // Useful when you need indexes as well as values.
+        for (index in numbers.indices.reversed()) {
+            println("Index: $index, Item: ${numbers[index]}")
+        }
+
+        // 4. reversed()
+        // Creates a new list containing the elements in reverse order.
+        val reversedNumbers = numbers.reversed()
+        println(reversedNumbers) // [4, 2, 7, 4, 2, 1]
+
 
         // =========================================================
         // 7.9 forEach
@@ -1209,8 +1323,7 @@ class MainActivity : AppCompatActivity() {
         // 7.13 Mutation During Iteration
         // =========================================================
 
-        val mutableList =
-            mutableListOf(1, 2, 3)
+        val mutableList = mutableListOf(1, 2, 3)
 
         /*
          * Dangerous:
@@ -1270,10 +1383,33 @@ class MainActivity : AppCompatActivity() {
                 println("$i $j")
             }
         }
-        /*
-         * continue@label
-         * also possible.
-         */
+
+        // =========================================================
+        // Labeled continue
+        // =========================================================
+
+        // Skips the remaining statements in the current iteration
+        // of the specified outer loop and continues its next iteration.
+
+        outer@ for (i in 1..3) {
+            for (j in 1..3) {
+                if (j == 2) {
+                    continue@outer
+                }
+
+                println("i = $i, j = $j")
+            }
+        }
+
+        // Output:
+        // i = 1, j = 1
+        // i = 2, j = 1
+        // i = 3, j = 1
+
+        // Without @outer, `continue` would continue only the inner loop.
+        // With continue@outer, execution jumps to the next iteration
+        // of the outer loop.
+
 
         // =========================================================
         // 7.17 Non-local Return in forEach
@@ -1313,7 +1449,6 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-
         // =========================================================
         // 7.18 Progression Internals
         // =========================================================
@@ -1338,7 +1473,6 @@ class MainActivity : AppCompatActivity() {
          */
 
 
-
         // =========================================================
         // 7.19 Char Iteration
         // =========================================================
@@ -1346,9 +1480,7 @@ class MainActivity : AppCompatActivity() {
         for (c in 'a'..'f') {
             print("$c ")
         }
-
         println()
-
 
 
         // =========================================================
@@ -1399,6 +1531,8 @@ class MainActivity : AppCompatActivity() {
 
 
 
+
+
         // =========================================================
         // 12. break
         // =========================================================
@@ -1433,7 +1567,6 @@ class MainActivity : AppCompatActivity() {
         println()
 
 
-
         // =========================================================
         // 14. Labeled break
         // =========================================================
@@ -1465,6 +1598,27 @@ class MainActivity : AppCompatActivity() {
         //
         // }
 
+        // =========================================================
+        // return: Exiting a Function Early
+        // =========================================================
+
+        fun printPositiveNumber(number: Int) {
+            if (number <= 0) {
+                println("Number must be positive")
+                return
+            }
+
+            println("Positive number: $number")
+        }
+
+        printPositiveNumber(10)
+        printPositiveNumber(-5)
+
+        // `return` exits the current function immediately.
+        // Statements after return are not executed on that path.
+
+        // This is useful for guard clauses: handle invalid or
+        // exceptional conditions early, then continue with normal logic.
 
 
         // =========================================================
@@ -1506,6 +1660,965 @@ class MainActivity : AppCompatActivity() {
          * -> jump interval
          */
     }
+
+
+    // =========================================================
+    // Inheritance
+    // =========================================================
+
+    private fun inheritance() {
+
+        /*
+         * In Kotlin:
+         *
+         * - classes are final by default
+         * - methods are final by default
+         * - properties are final by default
+         *
+         * Meaning:
+         *
+         * - classes cannot be inherited
+         * - methods/properties cannot be overridden
+         *
+         * To allow inheritance:
+         * use 'open'.
+         */
+
+
+        // =========================================================
+        // 1. Basic Inheritance
+        // =========================================================
+
+        open class Animal {
+            var color: String = ""
+
+            open fun eat() {
+                println("Animal is eating")
+            }
+        }
+
+        class Dog : Animal() {
+            var breed: String = ""
+
+            fun bark() {
+                println("Bark")
+            }
+
+            override fun eat() {
+                /*
+                 * super:
+                 * calls parent implementation.
+                 */
+                super.eat()
+                println("Dog is eating")
+            }
+        }
+
+
+        // =========================================================
+        // 2. Property Overriding
+        // =========================================================
+
+        /*
+         * Properties can also be overridden.
+         */
+
+        open class Vehicle {
+            open val type = "Vehicle"
+        }
+
+        class Car : Vehicle() {
+            override val type = "Car"
+        }
+
+        // =========================================================
+        // Property Overriding Rules
+        // =========================================================
+
+        /*
+         * Properties can be overridden
+         * similar to functions.
+         *
+         * Allowed:
+         *
+         * val -> val
+         * val -> var
+         * var -> var
+         *
+         * Not Allowed:
+         * var -> val
+         *
+         * Reason:
+         *
+         * var provides:
+         * - getter
+         * - setter
+         *
+         * val provides:
+         * - getter only
+         *
+         * Child class cannot remove
+         * functionality promised by parent.
+         */
+
+        // val → var
+        open class Parent1 {
+            open val name = "Parent"
+        }
+
+        class Child1 : Parent1() {
+            override var name = "Child"
+        }
+
+        // var → val (Invalid)
+        /*
+            open class Parent {
+                open var name = "Parent"
+            }
+
+            class Child : Parent() {
+                override val name = "Child"
+            }
+        */
+
+
+        // =========================================================
+        // 3. Qualified super Call
+        // =========================================================
+
+        /*
+         * Multiple interface inheritance
+         * may create method conflicts.
+         *
+         * In such cases:
+         * overriding becomes mandatory.
+         */
+
+        /* interface A {
+             fun show() {
+                 println("A")
+             }
+         }
+
+         interface B {
+             fun show() {
+                 println("B")
+             }
+         }
+
+         class Test : A, B {
+
+             override fun show() {
+
+                 *//*
+                 * Qualified super call.
+                 *
+                 * NOT generics.
+                 *//*
+
+                super<A>.show()
+                super<B>.show()
+            }
+        }*/
+
+
+        // =========================================================
+        // 4. Inheritance using Primary Constructor
+        // =========================================================
+
+        /*
+         * If parent class has constructor params,
+         * child class must initialize parent.
+         */
+
+        open class Person(
+            val name: String
+        )
+
+        class Employee(
+            name: String,
+            val role: String
+        ) : Person(name)
+
+        // =========================================================
+        // 5. Initialization Order
+        // =========================================================
+
+        /*
+         * During object creation,
+         * parent class is always initialized first.
+         *
+         * Initialization order:
+         *
+         * 1. Parent property initialization
+         * 2. Parent init block
+         * 3. Child property initialization
+         * 4. Child init block
+         * 5. Child secondary constructor body
+         */
+
+        open class Parent {
+
+            private val parentProperty =  println("Parent Property")
+
+            init {
+                println("Parent Init")
+            }
+        }
+
+        class Child() : Parent() {
+
+            private val childProperty = println("Child Property")
+
+            init {
+                println("Child Init")
+            }
+
+            constructor(value: String) : this() {
+                println("Child Constructor Body")
+            }
+        }
+
+        Child("Test")
+
+        /*
+         * Output:
+         *
+         * Parent Property
+         * Parent Init
+         * Child Property
+         * Child Init
+         * Child Constructor Body
+         *
+         * Parent initialization always
+         * completes before child initialization.
+         */
+
+        // =========================================================
+        // Why Parent Initializes First
+        // =========================================================
+
+        /*
+         * Child object contains
+         * parent object internally.
+         *
+         * Therefore parent must be fully
+         * initialized before child
+         * initialization begins.
+         *
+         * Conceptually:
+         *
+         * Child
+         *  └── Parent
+         *
+         * Parent creation always happens first.
+         */
+
+
+        // =========================================================
+        // 6. Calling Open Members in Constructor
+        // =========================================================
+
+        /*
+         * Dangerous practice.
+         *
+         * During parent initialization,
+         * child object may not be fully initialized.
+         */
+
+        open class Base {
+
+            init {
+                // Avoid calling open members here.
+                test()
+            }
+
+            open fun test() {
+                println("Base test")
+            }
+        }
+
+        class Derived : Base() {
+
+            private val value = "Initialized"
+
+            override fun test() {
+                /*
+                 * May execute before:
+                 * value initialization.
+                 */
+                println(value)
+            }
+        }
+
+
+        // =========================================================
+        // 7. Access Modifiers (Visibility Modifiers)
+        // =========================================================
+
+        /*
+         * Access modifiers control WHO can see and use your code.
+         * Think of them as privacy settings.
+         *
+         * The 4 Modifiers in Kotlin:
+         * 1. public    -> Open to EVERYONE (default in Kotlin)
+         * 2. protected -> Open to FAMILY ONLY (Parent class + Child classes)
+         * 3. internal  -> Open to MODULE ONLY (Everyone inside the same Gradle module)
+         * 4. private   -> Open to OWNER ONLY (Only inside the class or file where written)
+         *
+         * =========================================================
+         * Parent & Child Behavior Matrix
+         * =========================================================
+         * Member Type | Can Parent access? | Can Child access? | Can Outside World access?
+         * -----------------------------------------------------------------------------
+         * public      | YES                | YES               | YES
+         * protected   | YES                | YES               | NO
+         * internal    | YES                | YES (same module) | YES (if same module)
+         * private     | YES                | NO                | NO
+         */
+
+        // ---------------------------------------------------------
+        // 1. PUBLIC (Default)
+        // ---------------------------------------------------------
+        open class PublicParent {           // Class Level: Anyone can access/create
+            val publicName = "John"        // Field Level: Anyone can read
+            fun publicGreet() {            // Method Level: Anyone can call
+                println("Hello from Public")
+            }
+        }
+
+        class PublicChild : PublicParent() {
+            fun test() {
+                println(publicName)  // Child CAN access property
+                publicGreet()        // Child CAN access method
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 2. PROTECTED
+        // ---------------------------------------------------------
+        open class ProtectedParent {
+            protected val protectedSecret = "Parent's family secret" // Field Level
+            protected fun protectedMethod() {                        // Method Level
+                println("Protected method inside parent")
+            }
+        }
+
+        class ProtectedChild : ProtectedParent() {
+            fun test() {
+                println(protectedSecret) // Child CAN access parent's protected field
+                protectedMethod()        // Child CAN call parent's protected method
+            }
+        }
+
+        // Outside code CANNOT access protected members:
+        // val p = ProtectedParent()
+        // p.protectedSecret // COMPILER ERROR: Cannot access 'protectedSecret'
+
+        // ---------------------------------------------------------
+        // 3. INTERNAL (Same Gradle Module)
+        // ---------------------------------------------------------
+        open class InternalParent {         // Note: At top-level, can be marked 'internal class'
+            internal val moduleData = 100  // Field Level: Visible anywhere in same module
+            internal fun moduleTask() {    // Method Level: Visible anywhere in same module
+                println("Internal task")
+            }
+        }
+
+        class InternalChild : InternalParent() {
+            fun test() {
+                println(moduleData) // Child CAN access if in the same module
+                moduleTask()       // Child CAN call if in the same module
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 4. PRIVATE
+        // ---------------------------------------------------------
+        open class PrivateParent {
+            private val pinCode = 1234      // Field Level: Visible ONLY inside PrivateParent
+            private fun privateVault() {    // Method Level: Visible ONLY inside PrivateParent
+                println("Private vault: $pinCode")
+            }
+
+            fun accessOwnPrivate() {
+                println(pinCode)    // Parent CAN access its own private field
+                privateVault()     // Parent CAN call its own private method
+            }
+        }
+
+        class PrivateChild : PrivateParent() {
+            fun test() {
+                // println(pinCode)   // COMPILER ERROR: Child CANNOT access parent's private field!
+                // privateVault()     // COMPILER ERROR: Child CANNOT call parent's private method!
+            }
+        }
+
+
+        // =========================================================
+        // 8. Visibility Restriction Rule
+        // =========================================================
+
+        /*
+         * Overridden member visibility
+         * cannot be reduced.
+         */
+
+        open class Shape {
+            open fun draw() {}
+        }
+
+        class Circle : Shape() {
+            /*
+             * Invalid:
+             * private override fun draw()
+             */
+
+            override fun draw() {}
+        }
+
+
+        // =========================================================
+        // 9. Final Override
+        // =========================================================
+
+        /*
+         * override members remain open
+         * unless explicitly marked final.
+         */
+
+        open class Bird {
+            open fun fly() {}
+        }
+
+        open class Eagle : Bird() {
+            final override fun fly() {
+                println("Eagle flying")
+            }
+        }
+
+        /*
+         * Cannot override fly() further.
+         */
+
+
+        // =========================================================
+        // Quick Revision
+        // =========================================================
+
+        /*
+         * open
+         * -> allows inheritance/override
+         *
+         * override
+         * -> overrides parent member
+         *
+         * super
+         * -> access parent implementation
+         *
+         * super<Type>
+         * -> resolve multiple inheritance conflict
+         *
+         * classes are final by default
+         *
+         * properties can also be overridden
+         *
+         * constructor initialization order matters
+         *
+         * avoid calling open members
+         * inside constructors/init blocks
+         */
+    }
+
+
+    // =========================================================
+    // Inheritance with Primary & Secondary Constructor
+    // =========================================================
+    private fun inheritanceWithPrimaryAndSecondaryConstructor() {
+
+        // =========================================================
+        // 1. Secondary Constructor Inheritance
+        // =========================================================
+
+        open class Animal {
+            var color: String = ""
+
+            constructor(color: String) {
+                this.color = color
+                println("Animal color: $color")
+            }
+        }
+
+        class Dog : Animal {
+
+            var breed: String = ""
+
+            constructor(
+                color: String,
+                breed: String
+            ) : super(color) {
+
+                this.breed = breed
+
+                println("Dog breed: $breed")
+            }
+        }
+
+        val dog =
+            Dog("Black", "Pug")
+
+
+        // =========================================================
+        // 2. Parent Constructor Rules
+        // =========================================================
+
+        /*
+         * If parent has primary constructor:
+         * child must initialize it.
+         *
+         * If child uses secondary constructor:
+         * it must delegate to:
+         *
+         * - this(...)
+         * OR
+         * - super(...)
+         */
+
+
+        // =========================================================
+        // 3. Primary Constructor Inheritance
+        // =========================================================
+
+        open class Person(
+            val name: String,
+            val age: Int
+        )
+
+        class Developer(
+            name: String,
+            age: Int,
+            val tech: String
+        ) : Person(name, age)
+
+
+        // =========================================================
+        // 4. this Constructor Delegation
+        // =========================================================
+
+        /*
+         * 'this(...)' calls another
+         * constructor of the SAME class.
+         *
+         * Used to reuse initialization logic.
+         *
+         * Every secondary constructor
+         * must delegate to:
+         *
+         * - this(...)
+         * OR
+         * - super(...)
+         */
+
+        class Student(
+            val name: String
+        ) {
+
+            var age: Int = 0
+
+            init {
+                println("Init Block")
+            }
+
+            constructor(
+                name: String,
+                age: Int
+            ) : this(name) {
+
+                println("Secondary Constructor")
+
+                this.age = age
+            }
+        }
+
+        Student("Rahul", 25)
+
+        /*
+         * Execution Flow:
+         *
+         * Student("Rahul", 25)
+         *
+         * ->
+         * Secondary Constructor called
+         *
+         * ->
+         * this(name)
+         *
+         * ->
+         * Primary Constructor executes
+         *
+         * ->
+         * init block executes
+         *
+         * ->
+         * Control returns to
+         * Secondary Constructor
+         *
+         * ->
+         * Remaining constructor code runs
+         */
+
+
+        // =========================================================
+        // 5. init Block
+        // =========================================================
+
+        /*
+         * init block executes
+         * during object creation.
+         *
+         * Runs before
+         * secondary constructor body.
+         */
+
+        class User(
+            val username: String
+        ) {
+
+            init {
+                println("Init block: $username")
+            }
+
+            constructor(
+                username: String,
+                age: Int
+            ) : this(username) {
+
+                println("Secondary constructor")
+            }
+        }
+
+
+        // =========================================================
+        // 6. Constructor Execution Flow
+        // =========================================================
+
+        /*
+         * For inherited classes:
+         *
+         * Parent constructor
+         * ->
+         * Parent init
+         * ->
+         * Child init
+         * ->
+         * Child constructor body
+         */
+
+
+        // =========================================================
+        // Quick Revision
+        // =========================================================
+
+        /*
+         * child constructor must initialize parent
+         *
+         * secondary constructor:
+         * -> this(...)
+         * -> super(...)
+         *
+         * init block:
+         * executes during object creation
+         *
+         * parent initialization
+         * always happens first
+         */
+    }
+
+
+    // =========================================================
+    // Abstract Class & Interface
+    // =========================================================
+    private fun abstractAndInterface() {
+
+        // =========================================================
+        // 1. Abstract Class
+        // =========================================================
+
+        /*
+         * Abstract classes:
+         *
+         * - cannot be instantiated
+         * - can contain abstract members
+         * - can contain concrete members
+         * - can contain state
+         * - can have constructors
+         *
+         * abstract members are implicitly open.
+         */
+
+        abstract class Animal {
+
+            abstract val type: String
+
+            abstract fun sound()
+
+            fun sleep() {
+                println("Sleeping")
+            }
+        }
+
+        class Dog : Animal() {
+
+            override val type = "Dog"
+
+            override fun sound() {
+                println("Bark")
+            }
+        }
+
+
+        // =========================================================
+        // 2. Abstract Property
+        // =========================================================
+
+        /*
+         * Abstract properties:
+         *
+         * - cannot have initialization
+         * - must be overridden
+         */
+
+        abstract class Shape {
+
+            abstract val area: Double
+        }
+
+
+        // =========================================================
+        // 3. Interface Basics
+        // =========================================================
+
+        /*
+         * Interfaces define behavior contract.
+         *
+         * Interfaces can contain:
+         *
+         * - abstract functions
+         * - concrete functions
+         * - abstract properties
+         *
+         * Interfaces cannot store state.
+         */
+
+        /* interface Drivable {
+
+             fun drive()
+
+             fun stop() {
+                 println("Stopped")
+             }
+         }
+
+         class Car : Drivable {
+
+             override fun drive() {
+                 println("Driving")
+             }
+         }*/
+
+
+        // =========================================================
+        // 4. Interface Property Rules
+        // =========================================================
+
+        /*    interface Engine {
+
+                *//*
+             * No backing field allowed.
+             *//*
+
+            val fuelType: String
+                get() = "Petrol"
+        }
+*/
+
+        // =========================================================
+        // 5. Multiple Interface Inheritance
+        // =========================================================
+
+        /*  interface A {
+
+              fun show() {
+                  println("A")
+              }
+          }
+
+          interface B {
+
+              fun show() {
+                  println("B")
+              }
+          }
+
+          class Test : A, B {
+
+              *//*
+             * Mandatory override:
+             * because method conflict exists.
+             *//*
+
+            override fun show() {
+
+                super<A>.show()
+                super<B>.show()
+            }
+        }
+*/
+
+        // =========================================================
+        // 6. Abstract Class vs Interface
+        // =========================================================
+
+        /*
+         * Abstract class:
+         *
+         * - shared state
+         * - base implementation
+         * - common hierarchy
+         *
+         * Interface:
+         *
+         * - capability
+         * - contract
+         * - multiple inheritance
+         */
+
+
+        // =========================================================
+        // 7. Interface Delegation
+        // =========================================================
+
+        /*
+         * Important Kotlin feature.
+         *
+         * Reduces boilerplate delegation code.
+         */
+
+        /* interface Printer {
+
+             fun print()
+         }
+
+         class FilePrinter : Printer {
+
+             override fun print() {
+                 println("Printing from file")
+             }
+         }
+
+         class Manager(
+             private val printer: Printer
+         ) : Printer by printer*/
+
+
+        // =========================================================
+        // 8. Functional Interface (SAM)
+        // =========================================================
+
+        /*
+         * fun interface:
+         * contains single abstract method.
+         *
+         * Supports lambda instantiation.
+         */
+
+        /*      fun interface ClickListener {
+
+                  fun onClick()
+              }
+
+              val listener =
+                  ClickListener {
+                      println("Clicked")
+                  }
+      */
+
+        // =========================================================
+        // 9. Sealed Class
+        // =========================================================
+
+        /*
+         * Restricted class hierarchy.
+         *
+         * Useful for:
+         * - state management
+         * - exhaustive when
+         */
+        /*
+                sealed class Result
+                class Success : Result()
+                class Error : Result()
+
+                fun handle(result: Result) {
+
+                    when (result) {
+
+                        is Success ->
+                            println("Success")
+
+                        is Error ->
+                            println("Error")
+                    }
+
+                    /*
+                     * No else required.
+                     */
+                }
+                */
+
+
+        // =========================================================
+        // 10. open vs abstract
+        // =========================================================
+
+        /*
+         * open
+         * -> can override
+         *
+         * abstract
+         * -> must override
+         */
+
+
+        // =========================================================
+        // Quick Revision
+        // =========================================================
+
+        /*
+         * abstract class
+         * -> shared state + behavior
+         *
+         * interface
+         * -> contract/capability
+         *
+         * interfaces support:
+         * multiple inheritance
+         *
+         * interfaces cannot store state
+         *
+         * abstract members are implicitly open
+         *
+         * super<Type>
+         * resolves method conflicts
+         *
+         * sealed class
+         * -> restricted hierarchy
+         *
+         * fun interface
+         * -> SAM support
+         */
+    }
+
 
     private fun extensionFunction() {
         var student = Studentt()
@@ -1815,27 +2928,6 @@ class MainActivity : AppCompatActivity() {
         val animals = listOf("fox", "bear", "wolf")
 
         colors.zip(animals)
-    }
-
-    private fun arrays() {
-        // Elements :   32  0   0   54  0
-        // Index    :   0   1   2   3   4
-
-        //{0} will initialize all elements with 0
-        val myArray = Array<Int>(5) { 0 }   // Mutable. Fixed Size.
-        myArray[0] = 32
-        myArray[3] = 54
-
-
-        for (element in myArray) {              // Using individual elements (Objects)
-            println(element)
-        }
-
-        println()
-
-        for (index in 0..myArray.size - 1) {            //Iterating with indexes.
-            println(myArray[index])
-        }
     }
 
     fun arrayExamples() {
@@ -2521,7 +3613,7 @@ class MainActivity : AppCompatActivity() {
         //or get value, but instead we need to add few other things or do some computations.
     }
 
-    class Demo() {
+    class Demo {
         var firstName: String? = null
         //Here even if we don't write this, by default this is implemented internally.
         //Note: in kotlin we don't write firstName = value, because if we do so, we will get
@@ -2658,40 +3750,6 @@ class MainActivity : AppCompatActivity() {
 
     data class SimpleUser(var name: String, val id: Int)
 
-    private fun abstractAndInterface() {
-        // For inheritance we use open keyword so that the class or method can be inherited.
-        // but if want to make a variable,function or class as abstract, we don't need open keyword
-        // alongside abstract, we can simply use abstract and open is added internally.
-        //Rest all concepts are same with java.
-
-        //interface
-        // Interface can contain both normal and abstract methods but variable if declared, should
-        // be abstract only. All concepts are same as java
-
-        //Note: if we have two interface with same name methods and both are normal methods i.e.
-        // with body defined and not abstract. Then if we implement both interfaces, and  if even
-        //both methods are normal and its not compulsory to override them, compiler will show error
-        // so acc. to rules we have in the above scenario, then its mandatory to override method, we
-        //have choice to show among two.
-
-    }
-
-    private fun inheritanceWithPrimaryAndSecondaryConstructor() {
-
-        //Imp-Note: Whenever we use inheritance then we must call primary constructor of super/parent class
-        //if primary constructor of parent class has one or more parameters, then while creating primary
-        //constructor of child class, make sure you get the required param from child class primary constructor
-        //so that we can pass the same in parent class primary constructor.
-
-        //for secondary constructors
-        //for secondary constructor in child class, we must call super i.e parent class secondary constructor
-        var dog = TheDog("Black", "Pug")
-
-        //One more additional point related to access modifiers
-        //in kotlin we have a modifier named internal which is same as default in java
-        //rest all are same i.e. public, protected and private.
-
-    }
 
     open class TheAnimal {      // Super class / Parent class /  Base class
 
@@ -2709,28 +3767,10 @@ class MainActivity : AppCompatActivity() {
 
         constructor(color: String, breed: String) : super(color) {
             this.bread = breed
-
             println("From Dog: $color and $breed")
         }
     }
 
-    private fun inheritance() {
-        var dog = Dog()
-        dog.bread = "labra"
-        dog.color = "black"
-        dog.bark()
-        dog.eat()
-
-        var cat = Cat()
-        cat.age = 7
-        cat.color = "brown"
-        cat.meow()
-        cat.eat()
-
-        var animal = Animal()
-        animal.color = "white"
-        animal.eat()
-    }
 
     class Person {
         var name: String = "harshit"
@@ -2943,7 +3983,7 @@ class MainActivity : AppCompatActivity() {
         //Imp Note : Suppose the Animal class also implement an interface which also have same
         //eat method, then which one will be called for super call?
         //To avoid such confusions we use generics i.e. <>, and specify that we need Animal class
-        // eat method not interface one by specifying name of class in <>
+        //eat method not interface one by specifying name of class in <>
 
         override fun eat() {
             super<Animal>.eat()
@@ -2960,8 +4000,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Wolf now inherits from Animal AND implements the Carnivore interface.
-// Both Animal and Carnivore have an 'eat()' method. This creates a conflict.
-// The compiler forces us to override 'eat()' in Wolf to resolve this ambiguity.
+    // Both Animal and Carnivore have an 'eat()' method. This creates a conflict.
+    // The compiler forces us to override 'eat()' in Wolf to resolve this ambiguity.
+
     class Wolf : Animal(), Carnivore {
 
         // --- CORRECTED COMMENT AND IMPLEMENTATION FOR CONFLICT RESOLUTION ---
